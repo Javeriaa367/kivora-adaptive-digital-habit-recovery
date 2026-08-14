@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Paced Breathing — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-5 sm:px-8 py-16">
+  <div class="text-center mb-10">
+    <h1 class="text-3xl font-display font-bold text-ink mb-2">Paced Breathing</h1>
+    <p class="text-slate-500 max-w-xl mx-auto">4-4-6 breathing: inhale 4s, hold 4s, exhale 6s. Two minutes is enough to settle your nervous system. Breathing rounds are also part of your Recovery Plan.</p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+    <div class="flex flex-col items-center py-6">
+      <div id="breath-circle" class="w-40 h-40 rounded-full bg-teal-400 flex items-center justify-center text-white font-display font-semibold transition-transform duration-[4000ms] ease-in-out">
+        <span id="breath-label">Ready</span>
+      </div>
+      <p class="text-xs text-slate-400 mt-6">Cycles completed: <span id="breath-cycles" class="font-mono-data font-semibold text-teal-600">0</span></p>
+      <div class="flex items-center gap-3 mt-4">
+        <button id="breath-start" class="bg-ink text-white text-sm font-semibold px-6 py-2.5 rounded-lg">Start</button>
+        <button id="breath-sound" class="text-slate-400 hover:text-teal-600 w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center" aria-label="Toggle sound"><i class="fa-solid fa-volume-high"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 bg-teal-50 border border-teal-200 rounded-2xl p-5">
+    <p class="text-sm text-slate-600"><span class="font-semibold text-teal-700">Tip:</span> if your Recovery Plan is active, guided breathing and focus breaks are already built into your daily tasks — this page is for any time you need a reset.</p>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/breathing.js') }}"></script>
+{% endblock %}

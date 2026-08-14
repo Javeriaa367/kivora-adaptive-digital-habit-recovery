@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Feedback — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-display font-bold text-ink mb-8">Feedback &amp; Referrals</h1>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+    <h3 class="font-display font-semibold text-ink mb-3">Share feedback</h3>
+    <form id="feedback-form">
+      <textarea id="feedback-message" rows="3" maxlength="2000" placeholder="What's working? What isn't?"
+        class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm mb-3"></textarea>
+      <div class="flex items-center justify-between">
+        <div id="rating-stars" class="flex gap-1 text-xl text-slate-300">
+          {% for i in range(1,6) %}<i class="fa-solid fa-star cursor-pointer" data-value="{{ i }}"></i>{% endfor %}
+        </div>
+        <button type="submit" class="bg-ink text-white text-sm font-semibold px-5 py-2.5 rounded-xl">Submit</button>
+      </div>
+    </form>
+    <p id="feedback-result" class="text-sm mt-2"></p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+    <h3 class="font-display font-semibold text-ink mb-3">Your referral link</h3>
+    <div class="flex items-center gap-2">
+      <input readonly value="{{ request.host_url }}signup?ref={{ referral.referral_code }}" class="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm bg-slate-50" id="referral-link">
+      <button onclick="navigator.clipboard.writeText(document.getElementById('referral-link').value)" class="bg-ink text-white text-sm font-semibold px-4 py-2.5 rounded-xl">Copy</button>
+    </div>
+    <p class="text-sm text-slate-600 mt-3">Each friend who signs up with your link gets <strong>{{ referral_days }} days of Premium free</strong> — and so do you.</p>
+    <p class="text-xs text-slate-400 mt-1">{{ referral.total_referred }} people signed up with your link.</p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+    <h3 class="font-display font-semibold text-ink mb-3">Share a testimonial</h3>
+    <form id="testimonial-form">
+      <textarea id="testimonial-quote" rows="2" maxlength="500" placeholder="What's your experience been like?"
+        class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm mb-3"></textarea>
+      <button type="submit" class="bg-ink text-white text-sm font-semibold px-5 py-2.5 rounded-xl">Submit</button>
+    </form>
+    <p id="testimonial-result" class="text-sm mt-2"></p>
+  </div>
+
+  {% if testimonials %}
+  <h3 class="font-display font-semibold text-ink mb-3">What people are saying</h3>
+  <div class="space-y-3">
+    {% for t in testimonials %}
+    <div class="bg-slate-50 rounded-xl p-4 text-sm text-slate-600">
+      <p>"{{ t.quote }}"</p>
+      <p class="text-xs text-slate-400 mt-2">— {{ t.user_name }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/feedback.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Sign up — Kivora{% endblock %}
+{% block content %}
+<section class="min-h-[calc(100vh-4rem-6rem)] flex items-center justify-center bg-ink bg-dot-grid px-5 py-16">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    <div class="text-center mb-8">
+      <span class="inline-flex w-12 h-12 rounded-xl bg-teal-50 items-center justify-center text-teal-600 mb-4">
+        <i class="fa-solid fa-wave-square text-xl"></i>
+      </span>
+      <h1 class="text-2xl font-display font-bold text-ink">Create your account</h1>
+      <p class="text-sm text-slate-500 mt-1">Start tracking your digital well-being</p>
+    </div>
+
+    <form method="POST" class="space-y-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div>
+        <label class="block text-sm font-semibold text-slate-600 mb-1.5">Name</label>
+        <input type="text" name="name" required value="{{ name or '' }}" autocomplete="name"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-600 mb-1.5">Email</label>
+        <input type="email" name="email" required value="{{ email or '' }}" autocomplete="email"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-600 mb-1.5">Password</label>
+        <input type="password" name="password" required autocomplete="new-password" minlength="8"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+        <p class="text-xs text-slate-400 mt-1">At least 8 characters</p>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-600 mb-1.5">Confirm password</label>
+        <input type="password" name="confirm_password" required autocomplete="new-password" minlength="8"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-600 mb-1.5">Referral code <span class="text-slate-400 font-normal">(optional)</span></label>
+        <input type="text" name="referral_code" value="{{ referral_code or '' }}"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-600 mb-1.5">Where are you located? <span class="text-slate-400 font-normal">(optional)</span></label>
+        <select name="country"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+          <option value="" {% if not country %}selected{% endif %}>Prefer not to say</option>
+          {% for code, label in supported_countries %}
+          <option value="{{ code }}" {% if country == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <p class="text-xs text-slate-400 mt-1">Used only to show you the right crisis-helpline numbers.</p>
+      </div>
+      <label class="flex items-start gap-2.5 text-xs text-slate-500 cursor-pointer">
+        <input type="checkbox" name="consent" required class="mt-0.5 w-4 h-4 rounded border-slate-300 accent-teal-500">
+        <span>I agree to the <a href="{{ url_for('main.privacy') }}" target="_blank" class="text-teal-600 font-semibold hover:underline">Privacy Policy</a>, and I understand this app is a self-help tool, not a medical or diagnostic service.</span>
+      </label>
+      <button type="submit" class="w-full bg-ink hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition-colors">
+        Create account
+      </button>
+    </form>
+
+    <p class="text-center text-sm text-slate-500 mt-6">
+      Already have an account? <a href="{{ url_for('auth.login') }}" class="text-teal-600 font-semibold hover:underline">Log in</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

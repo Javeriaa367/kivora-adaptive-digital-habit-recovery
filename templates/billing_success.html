@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="max-w-lg mx-auto px-5 py-24 text-center">
+  <span class="inline-flex w-16 h-16 rounded-full bg-teal-100 items-center justify-center text-teal-600 text-2xl mb-4"><i class="fa-solid fa-check"></i></span>
+  <h1 class="text-2xl font-display font-bold text-ink mb-2">You're upgraded!</h1>
+  <p class="text-slate-500 mb-6">Your plan updates once Stripe confirms the webhook (usually instant).</p>
+  <a href="{{ url_for('main.dashboard') }}" class="inline-block bg-ink text-white font-semibold px-6 py-3 rounded-xl">Back to dashboard</a>
+</section>
+{% endblock %}

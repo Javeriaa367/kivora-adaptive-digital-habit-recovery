@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Risk Insights — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-6xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-display font-bold text-ink mb-2">Early Risk Detection</h1>
+  <p class="text-slate-500 mb-6 max-w-2xl">
+    A transparent, rule-based read of your recent journal, assessments, habits, and memory --
+    not a diagnosis, not a trained clinical model. Every level below comes with the exact
+    reasons that produced it.
+  </p>
+
+  <div class="bg-amber-100/60 border border-amber-400 rounded-2xl p-5 mb-10 flex gap-3">
+    <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+    <p class="text-sm text-slate-700">
+      This is a self-reflection tool, not a medical assessment. If anything here concerns you,
+      or you're struggling, please reach out to a mental health professional or someone you trust.
+    </p>
+  </div>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12" id="risk-cards">
+    {% for cat in categories %}
+    {% set r = profile[cat] %}
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5" data-level="{{ r.level }}">
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-display font-semibold text-ink capitalize">{{ cat.replace('_', ' ') }}</span>
+        <span class="risk-badge text-xs font-bold px-2.5 py-1 rounded-full uppercase
+          {% if r.level == 'critical' %}bg-coral-500 text-white
+          {% elif r.level == 'high' %}bg-amber-500 text-white
+          {% elif r.level == 'moderate' %}bg-amber-200 text-amber-800
+          {% else %}bg-teal-100 text-teal-700{% endif %}">{{ r.level }}</span>
+      </div>
+      <p class="text-sm text-slate-600">{{ r.explanation }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-4">Risk score trend (last 90 days)</h2>
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <canvas id="risk-trend-chart" height="90"></canvas>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="{{ url_for('static', filename='js/risk.js') }}"></script>
+{% endblock %}

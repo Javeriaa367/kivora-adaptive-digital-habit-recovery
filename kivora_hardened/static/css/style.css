@@ -1,0 +1,83 @@
+html { scroll-behavior: smooth; }
+h1, h2, h3, h4, .font-display { font-family: 'Space Grotesk', sans-serif; }
+.font-mono-data { font-family: 'JetBrains Mono', monospace; }
+
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(255,255,255,0.10) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.pulse-line path {
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
+  animation: draw 6s ease-in-out infinite;
+}
+@keyframes draw {
+  0%   { stroke-dashoffset: 1400; }
+  45%  { stroke-dashoffset: 0; }
+  55%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1400; }
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 999px;
+  background: #E2E8F0;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px; width: 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 3px solid #0EA5A0;
+  box-shadow: 0 2px 6px rgba(14,165,160,0.4);
+  cursor: pointer;
+  margin-top: -6px;
+}
+input[type="range"]::-moz-range-thumb {
+  height: 20px; width: 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 3px solid #0EA5A0;
+  box-shadow: 0 2px 6px rgba(14,165,160,0.4);
+  cursor: pointer;
+}
+
+.field-tooltip { visibility: hidden; opacity: 0; transition: opacity .15s ease; }
+.field-tooltip-wrap:hover .field-tooltip,
+.field-tooltip-wrap:focus-within .field-tooltip { visibility: visible; opacity: 1; }
+
+.skeleton {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 37%, #F1F5F9 63%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+@keyframes skeleton-loading {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-line path { animation: none; stroke-dashoffset: 0; }
+  .skeleton { animation: none; }
+  * { scroll-behavior: auto !important; }
+}
+
+:focus-visible { outline: 2px solid #0EA5A0; outline-offset: 2px; }
+
+/* Dark mode: broad-brush override via html.dark, toggled by JS + localStorage.
+   Fast, global approach rather than per-template dark: variants -- covers
+   the common surfaces (cards, backgrounds, text) app-wide with one block. */
+html.dark body { background: #0B1120; color: #E2E8F0; }
+html.dark .bg-white { background-color: #111827 !important; }
+html.dark .bg-slate-50 { background-color: #0B1120 !important; }
+html.dark .bg-slate-100 { background-color: #1E293B !important; }
+html.dark .border-slate-200 { border-color: #1E293B !important; }
+html.dark .border-slate-300 { border-color: #334155 !important; }
+html.dark .text-ink { color: #F1F5F9 !important; }
+html.dark .text-slate-500, html.dark .text-slate-600, html.dark .text-slate-700 { color: #94A3B8 !important; }
+html.dark .text-slate-400 { color: #64748B !important; }
+html.dark input, html.dark select, html.dark textarea { background-color: #1E293B !important; color: #E2E8F0 !important; }

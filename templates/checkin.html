@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}Check-In — Kivora{% endblock %}
+{% block content %}
+
+<section class="bg-ink bg-dot-grid pt-14 pb-24 px-5 sm:px-8">
+  {% if onboard %}
+  <div class="max-w-4xl mx-auto mb-6">
+    <a href="{{ url_for('main.onboarding') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors mb-3">
+      <i class="fa-solid fa-arrow-left"></i> Onboarding — step 1 of 3
+    </a>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+      <span class="text-xs text-slate-400 ml-2">Step 1: your Check-In · Step 2: results (automatic) · Step 3: first journal entry</span>
+    </div>
+  </div>
+  {% endif %}
+  <div class="max-w-4xl mx-auto text-center mb-10">
+    <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-400/20 rounded-full px-3 py-1.5 mb-4">
+      <i class="fa-solid fa-circle-nodes"></i> {{ current_user_name }}'s Check-In
+    </span>
+    <h1 class="text-3xl sm:text-4xl font-bold text-white leading-tight mb-3 font-display">Your Wellbeing Check-In</h1>
+    <p class="text-slate-400 max-w-xl mx-auto">Tell Kivora about your recent habits and experiences. Every field feeds the prediction pipeline — results update instantly, no page reload.</p>
+  </div>
+
+  <!-- Model summary cards -->
+  <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
+    {% for key, label, icon in [
+      ('addiction_risk_flag', 'Addiction Risk', 'fa-triangle-exclamation'),
+      ('wellbeing_score', 'Wellbeing Score', 'fa-heart-pulse'),
+      ('wellbeing_risk_flag', 'Wellbeing Flag', 'fa-shield-heart')
+    ] %}
+    {% set m = metadata.targets[key] %}
+    <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+      <div class="flex items-center gap-2 text-slate-300 text-xs mb-1"><i class="fa-solid {{ icon }} text-teal-400"></i> {{ label }}</div>
+      <div class="text-white font-mono-data text-sm">
+        {% if m.test_accuracy %}
+          <span class="{{ 'text-teal-400' if m.confidence == 'strong' else 'text-amber-400' }}">{{ '%.0f'|format(m.test_accuracy * 100) }}% acc.</span>
+        {% elif m.test_r2 %}
+          <span class="text-amber-400">{{ '%.0f'|format(m.test_r2 * 100) }} R²</span>
+        {% else %}
+          <span class="text-slate-400">—</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-5 sm:px-8 -mt-14 pb-24 relative z-10">
+  <form id="predict-form" class="space-y-6">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- CARD 1: Usage & Habits -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600"><i class="fa-solid fa-chart-simple"></i></span>
+          <div><h3 class="font-display font-semibold text-ink">Usage &amp; Habits</h3><p class="text-xs text-slate-400">How you use the platforms</p></div>
+        </div>
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Daily Usage Hours</label>
+            <input type="number" step="0.1" name="Daily_Usage_Hours" required value="4.4" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Notifications Per Day</label>
+            <input type="number" name="Notifications_Per_Day" required value="59" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Platforms Used Count</label>
+            <input type="number" name="Platforms_Used_Count" required value="3" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Posts Per Week</label>
+            <input type="number" name="Posts_Per_Week" required value="4" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Primary Platform</label>
+            <select name="Primary_Platform" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
+              <option>Instagram</option><option>TikTok</option><option>YouTube</option>
+              <option>Facebook</option><option>Snapchat</option><option>Twitter/X</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: Psychological Indicators -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600"><i class="fa-solid fa-brain"></i></span>
+          <div><h3 class="font-display font-semibold text-ink">Psychological Indicators</h3><p class="text-xs text-slate-400">Rate each 0–10</p></div>
+        </div>
+        <div class="space-y-5">
+          {% for field, label in [
+            ('FOMO_Score', 'FOMO Score'),
+            ('Social_Comparison_Score', 'Social Comparison'),
+            ('Validation_Seeking_Score', 'Validation Seeking'),
+            ('Scroll_Without_Purpose', 'Scroll Without Purpose')
+          ] %}
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-sm font-semibold text-slate-600">{{ label }}</span>
+              <span id="{{ field }}-value" class="font-mono-data text-sm font-semibold text-teal-600 bg-teal-50 rounded-md px-2 py-0.5">5.5</span>
+            </div>
+            <input type="range" min="0" max="10" step="0.5" name="{{ field }}" value="5.5" id="{{ field }}" class="w-full">
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- CARD 3: Behavioral Flags -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600"><i class="fa-solid fa-toggle-on"></i></span>
+          <div><h3 class="font-display font-semibold text-ink">Behavioral Flags</h3><p class="text-xs text-slate-400">Quick yes/no &amp; timing</p></div>
+        </div>
+        <div class="space-y-6">
+          {% for field, label in [('Late_Night_Usage','Late Night Usage'), ('Tried_To_Cut_Back','Tried to Cut Back'), ('Failed_To_Cut_Back','Failed to Cut Back')] %}
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-2">{{ label }}</label>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="cursor-pointer">
+                <input type="radio" name="{{ field }}" value="1" class="peer sr-only" checked>
+                <span class="block text-center text-sm font-medium rounded-lg border border-slate-300 py-2 text-slate-500 peer-checked:bg-teal-500 peer-checked:text-white peer-checked:border-teal-500 transition-colors">Yes</span>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="{{ field }}" value="0" class="peer sr-only">
+                <span class="block text-center text-sm font-medium rounded-lg border border-slate-300 py-2 text-slate-500 peer-checked:bg-teal-500 peer-checked:text-white peer-checked:border-teal-500 transition-colors">No</span>
+              </label>
+            </div>
+          </div>
+          {% endfor %}
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-2">First Check in the Morning</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="cursor-pointer"><input type="radio" name="First_Check_Morning" value="0" class="peer sr-only" checked><span class="block text-center text-xs font-medium rounded-lg border border-slate-300 py-2 px-1 text-slate-500 peer-checked:bg-teal-500 peer-checked:text-white peer-checked:border-teal-500">&lt; 5 min</span></label>
+              <label class="cursor-pointer"><input type="radio" name="First_Check_Morning" value="1" class="peer sr-only"><span class="block text-center text-xs font-medium rounded-lg border border-slate-300 py-2 px-1 text-slate-500 peer-checked:bg-teal-500 peer-checked:text-white peer-checked:border-teal-500">5–30 min</span></label>
+              <label class="cursor-pointer"><input type="radio" name="First_Check_Morning" value="2" class="peer sr-only"><span class="block text-center text-xs font-medium rounded-lg border border-slate-300 py-2 px-1 text-slate-500 peer-checked:bg-teal-500 peer-checked:text-white peer-checked:border-teal-500">&gt; 30 min</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: Lifestyle & Balance -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600"><i class="fa-solid fa-leaf"></i></span>
+          <div><h3 class="font-display font-semibold text-ink">Lifestyle &amp; Balance</h3><p class="text-xs text-slate-400">Life outside the screen</p></div>
+        </div>
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Sleep Hours (per night)</label>
+            <input type="number" step="0.1" name="Sleep_Hours" required value="6.6" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Physical Activity (hrs/week)</label>
+            <input type="number" step="0.1" name="Physical_Activity_Hrs_Week" required value="3.0" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Screen-Free Time (hrs/day)</label>
+            <input type="number" step="0.1" name="Screen_Free_Time_Hrs" required value="3.0" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-sm font-semibold text-slate-600">Offline Relationship Quality</span>
+              <span id="Offline_Relationship_Quality-value" class="font-mono-data text-sm font-semibold text-teal-600 bg-teal-50 rounded-md px-2 py-0.5">5.4</span>
+            </div>
+            <input type="range" min="0" max="10" step="0.5" name="Offline_Relationship_Quality" value="5.4" id="Offline_Relationship_Quality" class="w-full">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="pt-2">
+      <button type="submit" id="submit-btn"
+        class="group w-full sm:w-auto sm:mx-auto sm:flex items-center justify-center gap-3 bg-ink hover:bg-slate-800 text-white font-semibold text-base px-8 py-4 rounded-xl shadow-lg transition-all hover:-translate-y-0.5">
+        <i class="fa-solid fa-wand-magic-sparkles text-teal-400 group-hover:rotate-12 transition-transform"></i>
+        <span id="submit-btn-label">Run Prediction Pipeline</span>
+      </button>
+    </div>
+  </form>
+
+  <div id="results-container" class="mt-16 hidden"></div>
+  <div id="error-container" class="mt-8 hidden"></div>
+
+  <div class="mt-16 text-center">
+    {% if onboard %}
+    <a href="{{ url_for('main.onboarding') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700">
+      <i class="fa-solid fa-route"></i> See my setup progress
+    </a>
+    {% else %}
+    <a href="{{ url_for('main.dashboard') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700">
+      <i class="fa-solid fa-gauge"></i> Back to your Dashboard to see trends &amp; your full report
+    </a>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/predict.js') }}"></script>
+{% endblock %}

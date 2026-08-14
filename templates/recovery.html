@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% block title %}Recovery Plan — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto px-5 sm:px-8 py-16">
+  <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div>
+      <span class="inline-flex items-center rounded-full bg-teal-100 text-teal-700 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] mb-3">
+        Adaptive recovery
+      </span>
+      <h1 class="text-3xl md:text-4xl font-display font-bold text-ink mb-2">Your recovery plan, tuned to you.</h1>
+      <p class="text-slate-500 max-w-2xl">
+        KIVORA adapts based on your triggers, recent outcomes, and recovery patterns so each next step feels more relevant than a generic checklist.
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+      <div class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+        <span class="text-xs font-medium text-slate-600">Adaptive system online</span>
+      </div>
+      {% if is_admin %}
+      <a href="{{ url_for('admin.recovery_preview') }}"
+         title="Admins can inspect the full plan, including days that would normally be locked."
+         class="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 text-amber-700 px-4 py-2 text-xs font-semibold shadow-sm hover:bg-amber-100 transition-colors">
+        <i class="fa-solid fa-eye"></i> Preview Full Plan
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="bg-amber-100/60 border border-amber-400 rounded-2xl p-5 mb-8 flex gap-3">
+    <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+    <p class="text-sm text-slate-700">
+      This is a self-guided wellness routine, not a treatment plan. If anything here concerns you,
+      please reach out to a mental health professional or someone you trust.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Adaptive focus</p>
+      <p id="summary-mechanism" class="text-lg font-display font-bold text-ink">{{ summary.mechanism }}</p>
+      <p class="text-xs text-slate-500 mt-1">Current trigger pattern</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Workload</p>
+      <p id="summary-workload" class="text-lg font-display font-bold text-ink">{{ summary.workload }}</p>
+      <p class="text-xs text-slate-500 mt-1">Recovery intensity</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Stage</p>
+      <p id="summary-stage" class="text-lg font-display font-bold text-ink">{{ summary.stage }}</p>
+      <p class="text-xs text-slate-500 mt-1">Difficulty tier</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Progress</p>
+      <p id="summary-progress" class="text-lg font-display font-bold text-ink">{{ summary.progress_percent }}%</p>
+      <p class="text-xs text-slate-500 mt-1">Plan completion</p>
+    </div>
+  </div>
+
+  <div class="bg-gradient-to-r from-teal-50 via-sky-50 to-cyan-50 border border-teal-200 rounded-2xl p-5 mb-6 shadow-sm">
+    <p class="text-[10px] font-semibold uppercase tracking-wide text-teal-700 mb-2">Why KIVORA chose this plan</p>
+    <p id="summary-reason" class="text-sm text-slate-700 leading-relaxed">{{ summary.reason }}</p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-teal-200 shadow-sm p-5 mb-6">
+    <div class="flex items-center justify-between gap-3 mb-2">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-teal-700">Next adaptive move</p>
+      <span class="text-[10px] font-medium text-slate-400">Live recommendation</span>
+    </div>
+    <p id="summary-next-intervention" class="text-lg font-display font-bold text-ink leading-snug">{{ summary.next_intervention }}</p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6" id="active-plan-card"
+       data-plan-id="{{ plan.id }}">
+    <div class="flex items-start justify-between mb-1 flex-wrap gap-2">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-wide text-teal-600">
+          {% if plan.source == 'risk_suggested' %}Recommended for you{% else %}Your plan{% endif %}
+        </span>
+        <h2 class="text-xl font-display font-bold text-ink">{{ plan.title }}</h2>
+      </div>
+      <span class="text-sm text-slate-400">Day {{ plan.progress.current_day }} of {{ plan.duration_days }}</span>
+    </div>
+    {% if plan.recommend_reason %}
+    <p class="text-sm text-slate-500 mb-4">Suggested because {{ plan.recommend_reason }}.</p>
+    {% else %}
+    <p class="text-sm text-slate-500 mb-4">&nbsp;</p>
+    {% endif %}
+
+    <div class="w-full bg-slate-100 rounded-full h-2.5 mb-2 overflow-hidden">
+      <div id="progress-bar" class="bg-teal-500 h-2.5 rounded-full transition-all"
+           style="width: {{ plan.progress.percent }}%"></div>
+    </div>
+    <p id="progress-label" class="text-xs text-slate-400 mb-6">
+      {{ plan.progress.completed }} of {{ plan.progress.total }} days complete ({{ plan.progress.percent }}%)
+    </p>
+
+    <div id="brain-summary" class="flex items-center gap-3 rounded-xl bg-sky-50 border border-sky-200 px-4 py-3 mb-5">
+      <i class="fa-solid fa-brain text-sky-500"></i>
+      <p class="text-sm text-slate-600">Brain training streak:
+        <span class="font-semibold text-ink" id="brain-streak">—</span> day(s)</p>
+      <p class="text-sm text-slate-600">· Best score:
+        <span class="font-semibold text-ink" id="brain-best">—</span></p>
+    </div>
+
+    <div id="journey-list" class="space-y-4">
+      {% for day_number, day_tasks in plan.tasks|groupby('day_number') %}
+      {% set day_tasks = day_tasks|list %}
+      {% set day_done = day_tasks|selectattr('state', 'equalto', 'completed')|list|length == day_tasks|length %}
+      {% set is_current_day = day_number == plan.progress.current_day and not day_done %}
+      {% set is_locked = day_number > plan.progress.current_day %}
+      <div class="journey-day-group rounded-xl border p-4 transition-colors
+        {% if day_done %}bg-teal-50/60 border-teal-200
+        {% elif is_current_day %}border-teal-400 ring-1 ring-teal-200 bg-white
+        {% elif is_locked %}border-slate-100 bg-slate-50/60 opacity-60
+        {% else %}border-slate-200 bg-white{% endif %}">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-bold
+            {% if day_done %}bg-teal-500 text-white
+            {% elif is_locked %}bg-slate-200 text-slate-400
+            {% else %}bg-ink text-white{% endif %}">
+            {% if day_done %}<i class="fa-solid fa-check text-[10px]"></i>
+            {% elif is_locked %}<i class="fa-solid fa-lock text-[10px]"></i>
+            {% else %}{{ day_number }}{% endif %}
+          </span>
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Day {{ day_number }}
+            {% if not is_locked %}· {{ day_tasks|selectattr('state', 'equalto', 'completed')|list|length }}/{{ day_tasks|length }} activities{% endif %}
+          </p>
+        </div>
+        <div class="space-y-2 {% if is_locked %}pl-10{% endif %}">
+          {% for task in day_tasks %}
+          <div class="activity-row flex items-start justify-between gap-3 flex-wrap rounded-lg px-3 py-2.5
+            {% if not is_locked %}bg-slate-50/70{% endif %}"
+            data-task-id="{{ task.id }}" data-activity-type="{{ task.activity_type }}"
+            data-locked="{{ 'true' if is_locked else 'false' }}">
+            <div class="flex items-start gap-2.5">
+              {% if not is_locked %}
+              <span class="mt-0.5 w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px]
+                {% if task.state == 'completed' %}bg-teal-500 text-white
+                {% elif task.state == 'skipped' %}bg-slate-300 text-white
+                {% else %}bg-white border border-slate-300{% endif %}">
+                {% if task.state == 'completed' %}<i class="fa-solid fa-check"></i>{% endif %}
+              </span>
+              {% endif %}
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5 activity-type-label">
+                  {{ task.activity_type.replace('_', ' ') }}
+                </p>
+                <p class="text-sm text-slate-700 {% if task.state == 'completed' %}text-slate-500{% endif %}">
+                  {{ task.task_text }}
+                </p>
+              </div>
+            </div>
+            <div class="shrink-0">
+              {% if task.state == 'completed' %}
+                <span class="text-xs font-semibold text-teal-600"><i class="fa-solid fa-check"></i> Done</span>
+              {% elif task.state == 'skipped' %}
+                <span class="text-xs font-semibold text-slate-400">Skipped</span>
+              {% elif is_locked %}
+                <span class="text-xs font-medium text-slate-400">Locked</span>
+              {% else %}
+                <button class="open-activity-btn text-sm font-semibold px-4 py-2 rounded-xl bg-ink hover:bg-slate-800 text-white transition-colors">
+                  {% if task.state == 'in_progress' %}Continue{% else %}Start{% endif %}
+                </button>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% if not is_locked %}
+        <div class="brain-exercise-row mt-3 pl-10 flex items-center justify-between gap-3 flex-wrap rounded-lg border border-dashed border-sky-300 bg-sky-50/40 px-3 py-2.5"
+             data-brain-day="{{ day_number }}">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-brain text-sky-500"></i>
+            <div>
+              <p class="text-[10px] font-semibold uppercase tracking-wide text-sky-600">Adaptive brain exercise</p>
+              <p class="text-xs text-slate-500 brain-status-text">Loading…</p>
+            </div>
+          </div>
+          <button type="button" class="open-brain-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white transition-colors">Start</button>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-10">
+    <h3 class="font-display font-semibold text-ink mb-3">Switch to a different plan</h3>
+    <p class="text-sm text-slate-500 mb-4">Starting a new plan replaces the one above, which stays in your history.</p>
+    <div class="flex flex-wrap gap-2">
+      {% for type_key, template in plan_library.items() %}
+      <button class="start-plan-btn text-sm font-medium px-3.5 py-2 rounded-xl border transition-colors
+        {% if type_key == plan.plan_type %}bg-ink text-white border-ink{% else %}border-slate-200 text-slate-600 hover:border-teal-400{% endif %}"
+        data-plan-type="{{ type_key }}">
+        {{ template.title }} <span class="text-xs opacity-70">({{ template.duration_days }}d)</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display font-semibold text-ink">Recovery analytics</h3>
+      <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-600 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.15em]">
+        {{ summary.analytics.trend }}
+      </span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p class="text-[10px] uppercase tracking-wide text-slate-400 mb-2">Avg completion</p>
+        <p id="analytics-completion" class="text-2xl font-display font-bold text-ink">{{ (summary.analytics.completion_rate * 100)|int }}%</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p class="text-[10px] uppercase tracking-wide text-slate-400 mb-2">Usefulness</p>
+        <p id="analytics-usefulness" class="text-2xl font-display font-bold text-ink">{{ summary.analytics.usefulness_score|round(1) }}/5</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p class="text-[10px] uppercase tracking-wide text-slate-400 mb-2">Plans tracked</p>
+        <p id="analytics-plans" class="text-2xl font-display font-bold text-ink">{{ summary.analytics.plan_count }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p class="text-[10px] uppercase tracking-wide text-slate-400 mb-2">Confidence</p>
+        <p id="analytics-confidence" class="text-2xl font-display font-bold text-ink">{{ summary.analytics.confidence }}</p>
+      </div>
+    </div>
+  </div>
+
+  {% if adaptation_timeline %}
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-10">
+    <h3 class="font-display font-semibold text-ink mb-4">How KIVORA has adapted</h3>
+    <div class="space-y-3">
+      {% for event in adaptation_timeline %}
+      <div class="flex gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+        <div class="mt-0.5 w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-chart-line text-xs"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ event.date }}</p>
+          <p class="font-semibold text-ink text-sm">{{ event.title }}</p>
+          <p class="text-sm text-slate-600">{{ event.detail }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if history %}
+  <h3 class="font-display font-semibold text-ink mb-4">Past plans</h3>
+  <div class="space-y-2">
+    {% for h in history %}
+    <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between">
+      <div>
+        <p class="font-semibold text-ink text-sm">{{ h.title }}</p>
+        <p class="text-xs text-slate-400">{{ h.started_at[:10] }} — {{ h.progress.percent }}% complete</p>
+      </div>
+      <span class="text-xs font-bold px-2.5 py-1 rounded-full uppercase
+        {% if h.status == 'completed' %}bg-teal-100 text-teal-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+        {{ h.status }}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<!-- Activity modal: content is filled in per activity_type by recovery.js -->
+<div id="activity-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-ink/60 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between px-6 pt-5 pb-2">
+      <p id="modal-eyebrow" class="text-xs font-semibold uppercase tracking-wide text-teal-600">Activity</p>
+      <button id="modal-close" class="text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div id="modal-body" class="px-6 pb-6 pt-1"></div>
+  </div>
+</div>
+
+<!-- Brain exercise modal (adaptive brain training, see js/brain.js) -->
+<div id="brain-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-ink/60 backdrop-blur-sm p-4"
+     role="dialog" aria-modal="true" aria-labelledby="brain-modal-eyebrow">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between px-6 pt-5 pb-2">
+      <p id="brain-modal-eyebrow" class="text-xs font-semibold uppercase tracking-wide text-sky-600">Adaptive brain exercise</p>
+      <button id="brain-modal-close" type="button" aria-label="Close brain exercise"
+              class="text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div id="brain-modal-body" class="px-6 pb-6 pt-1" aria-live="polite"></div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/recovery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/brain.js') }}"></script>
+{% endblock %}

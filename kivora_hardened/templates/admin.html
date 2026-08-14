@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Admin — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-6xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-display font-bold text-ink mb-8">Admin Dashboard</h1>
+
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10">
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Total Users</p><p class="text-2xl font-display font-bold text-ink">{{ stats.total_users }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Premium</p><p class="text-2xl font-display font-bold text-teal-600">{{ stats.plan_breakdown.premium or 0 }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Journal Entries</p><p class="text-2xl font-display font-bold text-ink">{{ stats.total_journal_entries }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Predictions Run</p><p class="text-2xl font-display font-bold text-ink">{{ stats.total_predictions }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Crisis Flags</p><p class="text-2xl font-display font-bold text-coral-600">{{ stats.crisis_flags_total }}</p></div>
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Users</h2>
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto mb-10">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-xs uppercase"><tr>
+        <th class="text-left px-4 py-3">Name</th><th class="text-left px-4 py-3">Email</th>
+        <th class="text-left px-4 py-3">Plan</th><th class="text-left px-4 py-3">Admin</th>
+        <th class="text-left px-4 py-3">Churn Risk</th><th class="text-left px-4 py-3">Joined</th>
+      </tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-3">{{ u.name }}</td>
+          <td class="px-4 py-3 text-slate-500">{{ u.email }}</td>
+          <td class="px-4 py-3">
+            <select data-user-id="{{ u.id }}" class="plan-select text-xs rounded-lg border border-slate-300 px-2 py-1">
+              <option value="free" {% if u.plan == 'free' %}selected{% endif %}>Free</option>
+              <option value="premium" {% if u.plan == 'premium' %}selected{% endif %}>Premium</option>
+            </select>
+          </td>
+          <td class="px-4 py-3">{{ 'Yes' if u.is_admin else 'No' }}</td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full
+              {% if u.churn.level == 'high' %}bg-coral-100 text-coral-600
+              {% elif u.churn.level == 'medium' %}bg-amber-100 text-amber-600
+              {% else %}bg-teal-100 text-teal-700{% endif %}"
+              title="{{ u.churn.reasons|join(', ') }}">{{ u.churn.level }}</span>
+          </td>
+          <td class="px-4 py-3 text-slate-400 text-xs">{{ u.created_at[:10] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="text-xs text-slate-400 mb-10">Churn risk is a heuristic (days since last activity), not a trained ML model — hover a badge for why.</p>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Create Coupon</h2>
+  <form id="coupon-form" class="flex gap-2 mb-10">
+    <input id="c-code" placeholder="CODE" class="rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase">
+    <input id="c-discount" type="number" min="1" max="100" placeholder="% off" class="w-24 rounded-xl border border-slate-300 px-3 py-2 text-sm">
+    <input id="c-uses" type="number" min="1" value="1" placeholder="Max uses" class="w-28 rounded-xl border border-slate-300 px-3 py-2 text-sm">
+    <button class="bg-ink text-white text-sm font-semibold px-4 py-2 rounded-xl">Create</button>
+  </form>
+  <div class="mb-10 space-y-2">
+    {% for c in coupons %}
+    <div class="text-sm text-slate-600 bg-white border border-slate-200 rounded-lg px-4 py-2 flex justify-between">
+      <span class="font-mono-data">{{ c.code }}</span><span>{{ c.discount_percent }}% off — {{ c.uses_count }}/{{ c.max_uses }} used</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Pending Testimonials</h2>
+  <div class="space-y-2 mb-10">
+    {% for t in pending_testimonials %}
+    {% if not t.approved %}
+    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+      <div><p class="text-sm text-slate-700">"{{ t.quote }}"</p><p class="text-xs text-slate-400">— {{ t.user_name }}</p></div>
+      <button data-id="{{ t.id }}" class="approve-testimonial-btn bg-teal-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">Approve</button>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Recent Feedback</h2>
+  <div class="space-y-2">
+    {% for f in feedback %}
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <p class="text-sm text-slate-700">{{ f.message }}</p>
+      <p class="text-xs text-slate-400 mt-1">— {{ f.user_name }} {% if f.rating %}· {{ f.rating }}/5{% endif %}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

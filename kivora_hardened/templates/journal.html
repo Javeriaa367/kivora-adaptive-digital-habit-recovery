@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Journal — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-5 sm:px-8 py-16">
+  {% if onboard %}
+  <div class="bg-white rounded-2xl border border-teal-300 ring-4 ring-teal-100 shadow-sm p-5 mb-8">
+    <a href="{{ url_for('main.onboarding') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors mb-2">
+      <i class="fa-solid fa-arrow-left"></i> Onboarding — step 3 of 3
+    </a>
+    <p class="text-sm text-slate-600">This is the final step. Write a short entry about how your day is going, then your dashboard is ready.</p>
+  </div>
+  {% endif %}
+  <h1 class="text-3xl font-display font-bold text-ink mb-2">Daily Journal</h1>
+  <p class="text-slate-500 mb-8">Write freely about your day. We'll detect the mood — this is a pattern-spotting tool, not a diagnosis.</p>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+    <form id="journal-form">
+      <div class="relative">
+        <textarea id="entry-text" name="entry_text" rows="6" maxlength="5000" required placeholder="How are you feeling today? Or tap the mic and just talk."
+          class="w-full rounded-xl border border-slate-300 px-4 py-3 pr-14 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 resize-none"></textarea>
+        <button type="button" id="voice-mic-btn" title="Speak your entry"
+          class="absolute top-3 right-3 h-9 w-9 rounded-full bg-teal-50 hover:bg-teal-100 text-teal-600 flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+      </div>
+
+      <!-- Live recording state: pulsing dot + interim transcript hint -->
+      <div id="voice-status" class="hidden items-center gap-2 mt-2 text-xs text-teal-600 font-medium">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500"></span>
+        </span>
+        <span id="voice-status-text">Listening… tap the mic again to stop</span>
+      </div>
+      <p id="voice-unsupported" class="hidden text-xs text-slate-400 mt-2">
+        Voice input isn't supported in this browser yet — try Chrome or Edge, or just type your entry.
+      </p>
+      <p id="voice-error" class="hidden text-xs text-coral-500 mt-2"></p>
+
+      <div class="flex items-center justify-between mt-3">
+        <span class="text-xs text-slate-400"><span id="char-count">0</span> / 5000</span>
+        <button type="submit" id="journal-submit" class="bg-ink hover:bg-slate-800 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-colors">
+          <i class="fa-solid fa-pen-nib mr-1.5"></i> Save entry
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div id="journal-result" class="hidden mb-6"></div>
+  <div id="crisis-banner" class="hidden mb-8"></div>
+
+  <!-- Memory: pattern insight grounded strictly in stored facts, never
+       raw journal text. See ml/memory.py. -->
+  <div id="memory-panel" class="bg-gradient-to-br from-teal-50 to-white rounded-2xl border border-teal-200 p-5 mb-10">
+    <div class="flex items-center gap-2 mb-2">
+      <i class="fa-solid fa-brain text-teal-600"></i>
+      <span class="text-sm font-display font-semibold text-ink">What I've noticed</span>
+    </div>
+    <p id="memory-insight-text" class="text-sm text-slate-600">Loading...</p>
+    <button id="memory-facts-toggle" class="text-xs text-teal-600 font-semibold mt-3 hover:underline">Show what I remember</button>
+    <div id="memory-facts-list" class="hidden mt-3 space-y-1"></div>
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-4">Recent entries</h2>
+  <div id="journal-history" class="space-y-3 mb-10">
+    {% for e in entries %}
+    <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-start gap-3">
+      <span class="text-2xl leading-none">{{ emotion_meta[e.emotion_label].emoji }}</span>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-sm font-semibold text-ink">{{ e.emotion_label }}</span>
+          {% if e.input_method in ('voice', 'voice_edited') %}
+          <i class="fa-solid fa-microphone text-teal-400 text-xs" title="Captured by voice"></i>
+          {% endif %}
+          <span class="text-xs text-slate-400">{{ e.created_at[:16].replace('T',' ') }}</span>
+        </div>
+        <p class="text-sm text-slate-500 line-clamp-2">{{ e.entry_text }}</p>
+      </div>
+    </div>
+    {% else %}
+    <p class="text-sm text-slate-400">No entries yet — write your first one above.</p>
+    {% endfor %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-4">Your common words</h2>
+  <div id="word-cloud" class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-wrap gap-3 items-center justify-center min-h-[100px]"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/journal.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,20 @@
+# Secrets -- never commit your real .env
+.env
+
+# Local SQLite database
+app.db
+*.db
+
+# Durable-persistence backups (database/persistence.py) -- the local
+# backup directory if PERSISTENCE_BACKUP_DIR=backups is used in dev.
+backups/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS/editor cruft
+.DS_Store
+.vscode/

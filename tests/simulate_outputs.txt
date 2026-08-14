@@ -1,0 +1,46 @@
+
+=== Mechanism A: automatic_checking ===
+id: auto_pause_1
+text: Pause for 10 seconds before opening any social app; name your urge.
+selection_reason: Mechanism 'automatic_checking' selected; difficulty 1; stage 1; fatigue 0.0
+difficulty: 1
+
+=== Mechanism B: boredom ===
+id: bored_replace_1
+text: When you notice boredom, do a 10-minute replacement activity (walk, music, or call).
+selection_reason: Mechanism 'boredom' selected; difficulty 1; stage 1; fatigue 0.0
+difficulty: 1
+
+=== After ineffective auto_location_1 ===
+id: auto_pause_1
+text: Pause for 10 seconds before opening any social app; name your urge.
+selection_reason: Mechanism 'automatic_checking' selected; difficulty 1; stage 1; fatigue 0.0
+difficulty: 1
+
+=== After successful auto_pause_1, stage 2 ===
+id: auto_location_1
+text: Keep your phone in another room during focused periods.
+selection_reason: Mechanism 'automatic_checking' selected; difficulty 2; stage 2; fatigue 0.0
+difficulty: 2
+
+=== After repeated failures (high fatigue) ===
+id: auto_pause_1
+text: Pause for 10 seconds before opening any social app; name your urge.
+selection_reason: Mechanism 'automatic_checking' selected; difficulty 1; stage 1; fatigue 5.0
+difficulty: 1
+
+=== Relapse plan created ===
+plan id 14
+day2 task text: Keep your phone in another room during focused periods.
+intervention_id on task: auto_location_1
+
+=== Journal-derived memory trigger ===
+Inserted journal text as memory trigger for user 4
+infer_mechanism -> cant_stop_once_started
+reasons -> ['your last assessment scored scrolling-without-purpose at 8/10']
+
+=== Selection after journal-based trigger ===
+id: cant_timer_1
+text: Before opening social media, set a visible timer for 5 minutes and stick to it.
+selection_reason: Mechanism 'cant_stop_once_started' selected; difficulty 1; stage 1; fatigue 0.0
+difficulty: 1

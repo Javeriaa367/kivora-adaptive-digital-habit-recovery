@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Log in — Kivora{% endblock %}
+{% block content %}
+<section class="min-h-[calc(100vh-4rem-6rem)] flex items-center justify-center bg-ink bg-dot-grid px-5 py-16">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    <div class="text-center mb-8">
+      <span class="inline-flex w-12 h-12 rounded-xl bg-teal-50 items-center justify-center text-teal-600 mb-4">
+        <i class="fa-solid fa-wave-square text-xl"></i>
+      </span>
+      <h1 class="text-2xl font-display font-bold text-ink">Welcome back</h1>
+      <p class="text-sm text-slate-500 mt-1">Log in to run your assessment</p>
+    </div>
+
+    <form method="POST" class="space-y-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div>
+        <label class="block text-sm font-semibold text-slate-600 mb-1.5">Email</label>
+        <input type="email" name="email" required value="{{ email or '' }}" autocomplete="email"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-600 mb-1.5">Password</label>
+        <input type="password" name="password" required autocomplete="current-password"
+          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+      </div>
+      <div class="text-right -mt-2">
+        <a href="{{ url_for('auth.forgot_password') }}" class="text-xs text-teal-600 font-semibold hover:underline">Forgot password?</a>
+      </div>
+      <button type="submit" class="w-full bg-ink hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition-colors">
+        Log in
+      </button>
+    </form>
+
+    {% if google_enabled %}
+    <div class="flex items-center gap-3 my-5"><div class="flex-1 h-px bg-slate-200"></div><span class="text-xs text-slate-400">or</span><div class="flex-1 h-px bg-slate-200"></div></div>
+    <a href="{{ url_for('auth.google_login') }}" class="w-full flex items-center justify-center gap-2 border border-slate-300 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+      <i class="fa-brands fa-google text-coral-500"></i> Continue with Google
+    </a>
+    {% endif %}
+
+    <p class="text-center text-sm text-slate-500 mt-6">
+      Don't have an account? <a href="{{ url_for('auth.signup') }}" class="text-teal-600 font-semibold hover:underline">Sign up</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

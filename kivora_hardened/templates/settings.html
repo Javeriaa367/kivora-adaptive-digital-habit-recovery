@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Settings — Kivora{% endblock %}
+{% block content %}
+<section class="bg-ink bg-dot-grid pt-14 pb-10 px-5 sm:px-8">
+  <div class="max-w-3xl mx-auto">
+    <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-400/20 rounded-full px-3 py-1.5 mb-4">
+      <i class="fa-solid fa-gear"></i> Settings
+    </span>
+    <h1 class="text-3xl font-display font-bold text-white leading-tight">Account &amp; privacy</h1>
+    <p class="text-slate-400 mt-2 text-sm">Manage your account, export your data, or delete everything.</p>
+  </div>
+</section>
+
+<section class="max-w-3xl mx-auto px-5 sm:px-8 py-10 space-y-6">
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <h2 class="text-lg font-display font-bold text-ink mb-4">Your account</h2>
+    <dl class="grid sm:grid-cols-2 gap-4 text-sm">
+      <div><dt class="text-xs text-slate-400 uppercase font-semibold mb-1">Name</dt><dd class="text-slate-700">{{ user.name }}</dd></div>
+      <div><dt class="text-xs text-slate-400 uppercase font-semibold mb-1">Email</dt><dd class="text-slate-700">{{ user.email }}</dd></div>
+      <div><dt class="text-xs text-slate-400 uppercase font-semibold mb-1">Plan</dt><dd class="text-slate-700 capitalize">{{ user.plan }}</dd></div>
+      <div><dt class="text-xs text-slate-400 uppercase font-semibold mb-1">Member since</dt><dd class="text-slate-700">{{ user.created_at[:10] }}</dd></div>
+      <div><dt class="text-xs text-slate-400 uppercase font-semibold mb-1">Privacy consent</dt>
+        <dd class="text-slate-700">
+          {% if user.consent_given %}Accepted{% if user.consent_at %} on {{ user.consent_at[:10] }}{% endif %}
+          {% else %}<span class="text-amber-600">Not recorded</span>{% endif %}
+        </dd></div>
+      <div><dt class="text-xs text-slate-400 uppercase font-semibold mb-1">Referral code</dt><dd class="text-slate-700 font-mono">{{ referral.referral_code or '—' }}</dd></div>
+    </dl>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <h2 class="text-lg font-display font-bold text-ink mb-1">Crisis resources</h2>
+    <p class="text-sm text-slate-500 mb-4">Tell us your country so we show the right emergency helplines in your journal and chat — we never show a phone number for the wrong region.</p>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <select id="country-select" class="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition">
+        <option value="">Prefer not to say</option>
+        {% for code, label in country_labels.items() %}
+        <option value="{{ code }}" {% if user.country_code == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button id="country-save-btn"
+        class="inline-flex items-center justify-center gap-2 bg-ink hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <i class="fa-solid fa-location-dot"></i> Save region
+      </button>
+    </div>
+    <p id="country-msg" class="hidden text-sm mt-3"></p>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <h2 class="text-lg font-display font-bold text-ink mb-1">Your data</h2>
+    <p class="text-sm text-slate-500 mb-4">You own everything you've created here. Download a complete copy of your journal entries, assessments, memories, and activity — or remove it all.</p>
+    <a href="{{ url_for('settings.export_account') }}"
+       class="inline-flex items-center gap-2 bg-ink hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+      <i class="fa-solid fa-download"></i> Download my data
+    </a>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <h2 class="text-lg font-display font-bold text-ink mb-1">Privacy policy</h2>
+    <p class="text-sm text-slate-500 mb-4">Everything we store, why, and how to exercise your rights.</p>
+    <a href="{{ url_for('main.privacy') }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700">
+      <i class="fa-solid fa-shield-heart"></i> Read the Privacy Policy
+    </a>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-coral-500/40 shadow-sm p-6">
+    <h2 class="text-lg font-display font-bold text-coral-600 mb-1">Delete your account</h2>
+    <p class="text-sm text-slate-500 mb-4">
+      This permanently deletes your account and <strong>all</strong> associated data — journal entries,
+      predictions, memory, recovery plans, and more. This cannot be undone.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <input id="delete-confirm" type="text" placeholder='Type "DELETE" to confirm'
+        class="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-coral-500 focus:ring-4 focus:ring-coral-100 transition">
+      <button id="delete-account-btn"
+        class="inline-flex items-center justify-center gap-2 bg-coral-500 hover:bg-coral-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+        <i class="fa-solid fa-trash-can"></i> Delete my account
+      </button>
+    </div>
+    <p id="delete-error" class="hidden text-sm text-coral-600 mt-3"></p>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const msg = document.getElementById('country-msg');
+    document.getElementById('country-save-btn').addEventListener('click', async () => {
+      msg.classList.add('hidden');
+      try {
+        const res = await fetch('/api/account/country', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ country_code: document.getElementById('country-select').value }),
+        });
+        const data = await res.json();
+        msg.classList.remove('hidden');
+        if (data.ok) {
+          msg.textContent = 'Region saved — crisis resources will update automatically.';
+          msg.className = 'text-sm mt-3 text-teal-600';
+        } else {
+          msg.textContent = data.error || 'Could not save your region.';
+          msg.className = 'text-sm mt-3 text-coral-600';
+        }
+      } catch {
+        msg.classList.remove('hidden');
+        msg.textContent = 'Could not save your region.';
+        msg.className = 'text-sm mt-3 text-coral-600';
+      }
+    });
+
+    const btn = document.getElementById('delete-account-btn');
+    const input = document.getElementById('delete-confirm');
+    const errEl = document.getElementById('delete-error');
+    btn.addEventListener('click', async () => {
+      errEl.classList.add('hidden');
+      if (input.value.trim() !== 'DELETE') {
+        errEl.textContent = 'Type DELETE to confirm account deletion.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+      try {
+        const res = await fetch('/api/account/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirm: 'DELETE' }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          window.location.href = '/';
+        } else {
+          errEl.textContent = data.error || 'Could not delete your account.';
+          errEl.classList.remove('hidden');
+          btn.disabled = false;
+          btn.textContent = 'Delete my account';
+        }
+      } catch {
+        errEl.textContent = 'Could not delete your account.';
+        errEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Delete my account';
+      }
+    });
+  });
+</script>
+{% endblock %}

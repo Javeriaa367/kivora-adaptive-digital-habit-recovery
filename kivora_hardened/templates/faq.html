@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}FAQ — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-2xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-display font-bold text-ink mb-2">FAQ Assistant</h1>
+  <p class="text-slate-500 mb-8">Ask how the app works — predictions, plans, privacy, anything.</p>
+
+  <form id="faq-form" class="flex gap-2 mb-6">
+    <input id="faq-question" placeholder="e.g. How accurate is the addiction risk prediction?" class="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm">
+    <button class="bg-ink text-white text-sm font-semibold px-5 py-2.5 rounded-xl">Ask</button>
+  </form>
+  <div id="faq-answer" class="space-y-3"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('faq-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const q = document.getElementById('faq-question').value.trim();
+  if (!q) return;
+  const el = document.getElementById('faq-answer');
+  const res = await fetch('/api/faq', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({question:q}) });
+  const data = await res.json();
+  const card = document.createElement('div');
+  card.className = 'bg-white rounded-xl border border-slate-200 p-4';
+  card.innerHTML = `<p class="text-sm font-semibold text-ink mb-1">${q}</p><p class="text-sm text-slate-600">${data.ok ? data.answer : data.error}</p>`;
+  el.prepend(card);
+  document.getElementById('faq-question').value = '';
+});
+</script>
+{% endblock %}

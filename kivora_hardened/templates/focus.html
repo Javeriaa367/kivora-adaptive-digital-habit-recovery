@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Focus Timer — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-lg mx-auto px-5 sm:px-8 py-16 text-center">
+  <h1 class="text-3xl font-display font-bold text-ink mb-2">Focus Timer</h1>
+  <p class="text-slate-500 mb-10">Pomodoro: 25 minutes focused, 5 minute break.</p>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-10 mb-6">
+    <p id="timer-display" class="text-6xl font-mono-data font-bold text-ink mb-2">25:00</p>
+    <p id="timer-mode" class="text-sm font-semibold text-teal-600 uppercase tracking-wide mb-6">Focus</p>
+    <div class="flex items-center justify-center gap-3">
+      <button id="timer-start" class="bg-ink hover:bg-slate-800 text-white font-semibold px-6 py-3 rounded-xl">Start</button>
+      <button id="timer-reset" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold px-6 py-3 rounded-xl">Reset</button>
+    </div>
+  </div>
+  <p class="text-sm text-slate-400">Pomodoros completed today: <span id="pomo-count" class="font-mono-data font-semibold text-teal-600">0</span></p>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/focus.js') }}"></script>
+{% endblock %}

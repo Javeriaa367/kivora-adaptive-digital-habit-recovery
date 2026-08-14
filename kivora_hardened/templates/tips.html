@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Well-being Tips — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-display font-bold text-ink mb-2">Well-being Tips</h1>
+  <p class="text-slate-500 mb-10">Practical, professionally-grounded guidance for a healthier relationship with your devices.</p>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for icon, title, body in [
+      ('fa-clock', 'Stress Management', 'Build short breaks into your day — even 5 minutes away from screens lowers cortisol and resets focus.'),
+      ('fa-moon', 'Sleep Improvement', 'Keep phones out of the bedroom. Blue light and notifications both delay sleep onset and reduce sleep quality.'),
+      ('fa-hourglass-half', 'Digital Wellness', 'Use app timers for the platforms you use most. Awareness of usage is the first step to changing it.'),
+      ('fa-people-group', 'Social Connection', 'Prioritize in-person or voice conversations over text when you can — they build stronger social bonds.'),
+      ('fa-person-running', 'Exercise', 'Even 20–30 minutes of movement a day is linked with measurable improvements in mood and anxiety.'),
+      ('fa-apple-whole', 'Nutrition', 'Stable blood sugar (regular meals, less sugar) supports more stable mood throughout the day.'),
+      ('fa-spa', 'Mindfulness', 'A few minutes of breathing or meditation can interrupt the automatic urge to check your phone.'),
+      ('fa-hourglass-end', 'Healthy Screen-Time Habits', 'Set specific check-in times for social media instead of leaving notifications on all day.'),
+    ] %}
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+      <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600 mb-4"><i class="fa-solid {{ icon }}"></i></span>
+      <h3 class="font-display font-semibold text-ink mb-1">{{ title }}</h3>
+      <p class="text-sm text-slate-500">{{ body }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

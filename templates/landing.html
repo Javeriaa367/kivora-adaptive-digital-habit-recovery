@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Kivora — Understand your digital well-being{% endblock %}
+{% block content %}
+
+<section class="bg-ink bg-dot-grid pt-20 pb-24 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-400/20 rounded-full px-3 py-1.5 mb-6">
+        <i class="fa-solid fa-circle-nodes"></i> Privacy-first digital wellbeing
+      </span>
+      <h1 class="text-4xl sm:text-5xl font-bold text-white leading-tight font-display">
+        Understand how your screen time shapes your <span class="text-teal-400">mind</span>.
+      </h1>
+      <p class="text-slate-300 mt-5 max-w-lg leading-relaxed">
+        Kivora turns your social-media habits, mood journal, and daily check-ins into a
+        clear picture of your mental wellbeing — with honest, explainable analysis that never pretends
+        to be a diagnosis.
+      </p>
+      <div class="flex flex-wrap items-center gap-4 mt-8">
+        <a href="{{ url_for('auth.signup') }}" class="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-ink font-semibold px-6 py-3 rounded-xl shadow-lg transition-colors">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Start free
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="inline-flex items-center gap-2 text-slate-300 hover:text-white font-semibold px-4 py-3 transition-colors">
+          I have an account <i class="fa-solid fa-arrow-right text-xs"></i>
+        </a>
+      </div>
+      <p class="text-xs text-slate-500 mt-6">Free plan: 3 assessments/day, unlimited journal, habits &amp; mind games. No credit card.</p>
+    </div>
+    <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur">
+      <div class="flex items-center justify-between mb-5">
+        <span class="text-white text-sm font-display font-semibold"><i class="fa-solid fa-wave-square text-teal-400 mr-2"></i>Your snapshot</span>
+        <span class="text-[10px] text-slate-400 uppercase tracking-wide">sample</span>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-coral-500/10 border border-coral-400/30 rounded-xl px-4 py-3">
+          <p class="text-xs text-slate-300 mb-1">Addiction Risk</p>
+          <p class="text-white font-display font-bold">At-risk</p>
+        </div>
+        <div class="bg-teal-500/10 border border-teal-400/20 rounded-xl px-4 py-3">
+          <p class="text-xs text-slate-300 mb-1">Wellbeing Score</p>
+          <p class="text-white font-display font-bold">6.4 <span class="text-xs text-slate-400">/ 10</span></p>
+        </div>
+        <div class="col-span-2 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+          <p class="text-xs text-slate-300 mb-1">Journal — this week</p>
+          <p class="text-sm text-slate-200 leading-relaxed">"Stressed about deadlines again — kept scrolling at midnight instead of sleeping."</p>
+        </div>
+        <div class="col-span-2 bg-teal-500/10 border border-teal-400/20 rounded-xl px-4 py-3 text-sm text-slate-200">
+          <i class="fa-solid fa-lightbulb text-teal-400 mr-2"></i>Pattern noticed: exam stress keeps showing up together with poor sleep.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-3xl font-display font-bold text-ink text-center mb-3">Built around real patterns, not labels</h2>
+    <p class="text-slate-500 text-center max-w-2xl mx-auto mb-12">Every prediction comes with its confidence, its contributing factors, and an honest note about what it can't tell you.</p>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white border border-slate-200 rounded-2xl p-6">
+        <span class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+        <h3 class="font-semibold text-ink mb-2">Smart Check-Ins</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Answer a 2-minute check-in and get a wellbeing snapshot with explanations you can actually understand.</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6">
+        <span class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4"><i class="fa-solid fa-book"></i></span>
+        <h3 class="font-semibold text-ink mb-2">Mood Journal</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Write freely. We detect the mood, note the sentiment, and quietly build a long-term memory of what matters to you.</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6">
+        <span class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4"><i class="fa-solid fa-route"></i></span>
+        <h3 class="font-semibold text-ink mb-2">Recovery Plans</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Guided 7-day plans with interactive activities — reflections, breathing, habits — that adapt to how you respond.</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6">
+        <span class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4"><i class="fa-solid fa-shield-heart"></i></span>
+        <h3 class="font-semibold text-ink mb-2">Risk Insights</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">A transparent early-warning engine that shows its work: every risk level comes with the exact reasons behind it.</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6">
+        <span class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4"><i class="fa-solid fa-comment-dots"></i></span>
+        <h3 class="font-semibold text-ink mb-2">Companion</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">A warm, memory-aware conversational partner grounded only in what it actually knows about you.</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6">
+        <span class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4"><i class="fa-solid fa-memory"></i></span>
+        <h3 class="font-semibold text-ink mb-2">Memory you control</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">See every fact the app has learned about you, delete any of them, or clear everything in one click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bg-ink bg-dot-grid py-20 px-5 sm:px-8">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-3xl font-display font-bold text-white text-center mb-12">How it works</h2>
+    <div class="grid md:grid-cols-3 gap-8 text-center">
+      <div>
+        <span class="w-12 h-12 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-400 font-display font-bold flex items-center justify-center mx-auto mb-4">1</span>
+        <h3 class="text-white font-semibold mb-2">Check in</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">Answer a short, honest assessment about your phone habits, sleep, and mood.</p>
+      </div>
+      <div>
+        <span class="w-12 h-12 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-400 font-display font-bold flex items-center justify-center mx-auto mb-4">2</span>
+        <h3 class="text-white font-semibold mb-2">Journal daily</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">A few sentences a day build your trends, streaks, and a long-term picture.</p>
+      </div>
+      <div>
+        <span class="w-12 h-12 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-400 font-display font-bold flex items-center justify-center mx-auto mb-4">3</span>
+        <h3 class="text-white font-semibold mb-2">Spot &amp; act</h3>
+        <p class="text-sm text-slate-400 leading-relaxed">Watch trends, follow a recovery plan, and get grounded advice that adapts over time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-20 px-5 sm:px-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 text-center">
+      <h2 class="text-3xl font-display font-bold text-ink mb-3">Your data, your call</h2>
+      <p class="text-slate-500 max-w-2xl mx-auto mb-8 leading-relaxed">
+        You own every entry, prediction, and memory. Download a full copy of your data or delete your
+        account — and everything it contains — at any time from Settings. We explain exactly what we
+        store and why in our
+        <a href="{{ url_for('main.privacy') }}" class="text-teal-600 font-semibold hover:underline">Privacy Policy</a>.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="{{ url_for('auth.signup') }}" class="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-ink font-semibold px-6 py-3 rounded-xl transition-colors">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Create your free account
+        </a>
+        <a href="{{ url_for('main.privacy') }}" class="inline-flex items-center gap-2 text-slate-600 hover:text-ink font-semibold px-4 py-3 transition-colors">
+          Read the Privacy Policy
+        </a>
+      </div>
+      <p class="text-xs text-slate-400 mt-8 max-w-xl mx-auto">
+        Kivora is a self-help and self-tracking tool. It is not a medical device, and its
+        predictions are not a diagnosis. If you're in crisis, reach out to local emergency services
+        or a mental-health professional.
+      </p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

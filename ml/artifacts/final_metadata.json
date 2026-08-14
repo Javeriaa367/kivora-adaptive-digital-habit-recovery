@@ -1,0 +1,385 @@
+{
+  "version": 2,
+  "trained_at": "2026-08-11T18:54:42Z",
+  "data_source": "ml_pipeline/data/social_media_addiction_mental_wellbeing.csv",
+  "data_sha256": "5e449957bdf75bb5cabf5e4d728cd6bbf78e58b5a7a3c1f3279538fa3824e764",
+  "n_rows": 1500,
+  "seed": 42,
+  "test_size": 0.2,
+  "wellbeing_median": 6.4,
+  "features": [
+    "Daily_Usage_Hours",
+    "Platforms_Used_Count",
+    "Posts_Per_Week",
+    "Notifications_Per_Day",
+    "FOMO_Score",
+    "Social_Comparison_Score",
+    "Validation_Seeking_Score",
+    "Scroll_Without_Purpose",
+    "Sleep_Hours",
+    "Offline_Relationship_Quality",
+    "Physical_Activity_Hrs_Week",
+    "Screen_Free_Time_Hrs",
+    "Late_Night_Usage",
+    "Tried_To_Cut_Back",
+    "Failed_To_Cut_Back",
+    "First_Check_Morning",
+    "Platform_Instagram",
+    "Platform_Snapchat",
+    "Platform_TikTok",
+    "Platform_Twitter/X",
+    "Platform_YouTube"
+  ],
+  "preprocessing": {
+    "numeric_imputation": "column median",
+    "binary_mapping": "Yes -> 1, else 0 (nulls -> 0)",
+    "first_check_morning": {
+      "Within 5 min": 0,
+      "5-30 min": 1,
+      "After 30 min": 2
+    },
+    "platform_dummies": "one-hot, Facebook is the reference (all-zero) category"
+  },
+  "targets": {
+    "addiction_risk_flag": {
+      "model": "LogisticRegression",
+      "test_accuracy": 0.8567,
+      "roc_auc": 0.9264,
+      "cv_accuracy_mean": 0.8142,
+      "cv_accuracy_std": 0.0217,
+      "confusion_matrix": [
+        [
+          154,
+          20
+        ],
+        [
+          23,
+          103
+        ]
+      ],
+      "confidence": "strong",
+      "feature_importance": [
+        {
+          "feature": "Failed_To_Cut_Back",
+          "importance": 1.1842
+        },
+        {
+          "feature": "First_Check_Morning",
+          "importance": 1.1524
+        },
+        {
+          "feature": "FOMO_Score",
+          "importance": 1.1289
+        },
+        {
+          "feature": "Social_Comparison_Score",
+          "importance": 0.8531
+        },
+        {
+          "feature": "Daily_Usage_Hours",
+          "importance": 0.8159
+        },
+        {
+          "feature": "Late_Night_Usage",
+          "importance": 0.7924
+        },
+        {
+          "feature": "Scroll_Without_Purpose",
+          "importance": 0.7803
+        },
+        {
+          "feature": "Validation_Seeking_Score",
+          "importance": 0.7339
+        },
+        {
+          "feature": "Offline_Relationship_Quality",
+          "importance": 0.6433
+        },
+        {
+          "feature": "Platform_TikTok",
+          "importance": 0.6186
+        }
+      ],
+      "description": "Binary: High/Severe addiction (at-risk) vs Low/Moderate"
+    },
+    "addiction_level_detail": {
+      "model": "LogisticRegression",
+      "test_accuracy": 0.5733,
+      "cv_accuracy_mean": 0.5908,
+      "cv_accuracy_std": 0.0488,
+      "confusion_matrix": [
+        [
+          29,
+          2,
+          24,
+          17
+        ],
+        [
+          1,
+          60,
+          23,
+          0
+        ],
+        [
+          17,
+          25,
+          47,
+          1
+        ],
+        [
+          16,
+          0,
+          2,
+          36
+        ]
+      ],
+      "confusion_matrix_labels": [
+        "High",
+        "Low",
+        "Moderate",
+        "Severe"
+      ],
+      "confidence": "weak",
+      "feature_importance": [
+        {
+          "feature": "First_Check_Morning",
+          "importance": 1.4676
+        },
+        {
+          "feature": "Failed_To_Cut_Back",
+          "importance": 1.3766
+        },
+        {
+          "feature": "FOMO_Score",
+          "importance": 1.31
+        },
+        {
+          "feature": "Daily_Usage_Hours",
+          "importance": 1.0865
+        },
+        {
+          "feature": "Scroll_Without_Purpose",
+          "importance": 1.054
+        },
+        {
+          "feature": "Late_Night_Usage",
+          "importance": 1.0387
+        },
+        {
+          "feature": "Social_Comparison_Score",
+          "importance": 0.9773
+        },
+        {
+          "feature": "Validation_Seeking_Score",
+          "importance": 0.9277
+        },
+        {
+          "feature": "Platform_TikTok",
+          "importance": 0.8712
+        },
+        {
+          "feature": "Platform_Instagram",
+          "importance": 0.774
+        }
+      ],
+      "description": "4-class: Low / Moderate / High / Severe addiction level"
+    },
+    "wellbeing_score": {
+      "model": "LinearRegression",
+      "test_r2": 0.6726,
+      "test_mae": 0.5677,
+      "cv_r2_mean": 0.653,
+      "cv_r2_std": 0.0316,
+      "confidence": "moderate",
+      "feature_importance": [
+        {
+          "feature": "First_Check_Morning",
+          "importance": 0.4348
+        },
+        {
+          "feature": "Failed_To_Cut_Back",
+          "importance": 0.4255
+        },
+        {
+          "feature": "FOMO_Score",
+          "importance": 0.3836
+        },
+        {
+          "feature": "Late_Night_Usage",
+          "importance": 0.3392
+        },
+        {
+          "feature": "Social_Comparison_Score",
+          "importance": 0.3124
+        },
+        {
+          "feature": "Scroll_Without_Purpose",
+          "importance": 0.3104
+        },
+        {
+          "feature": "Daily_Usage_Hours",
+          "importance": 0.2907
+        },
+        {
+          "feature": "Validation_Seeking_Score",
+          "importance": 0.2696
+        },
+        {
+          "feature": "Platform_TikTok",
+          "importance": 0.2506
+        },
+        {
+          "feature": "Notifications_Per_Day",
+          "importance": 0.2291
+        }
+      ],
+      "model_comparison": [
+        {
+          "model": "LinearRegression",
+          "cv_r2_mean": 0.653,
+          "cv_r2_std": 0.0316,
+          "cv_mae_mean": 0.614,
+          "selected": true
+        },
+        {
+          "model": "Ridge",
+          "cv_r2_mean": 0.653,
+          "cv_r2_std": 0.0315,
+          "cv_mae_mean": 0.614,
+          "selected": false
+        },
+        {
+          "model": "Lasso",
+          "cv_r2_mean": 0.6528,
+          "cv_r2_std": 0.0284,
+          "cv_mae_mean": 0.6142,
+          "selected": false
+        },
+        {
+          "model": "ElasticNet",
+          "cv_r2_mean": 0.6537,
+          "cv_r2_std": 0.0293,
+          "cv_mae_mean": 0.6132,
+          "selected": false
+        },
+        {
+          "model": "RandomForestRegressor",
+          "cv_r2_mean": 0.5134,
+          "cv_r2_std": 0.0056,
+          "cv_mae_mean": 0.7306,
+          "selected": false
+        },
+        {
+          "model": "GradientBoostingRegressor",
+          "cv_r2_mean": 0.5721,
+          "cv_r2_std": 0.0178,
+          "cv_mae_mean": 0.687,
+          "selected": false
+        },
+        {
+          "model": "SVR",
+          "cv_r2_mean": 0.5919,
+          "cv_r2_std": 0.0298,
+          "cv_mae_mean": 0.6666,
+          "selected": false
+        }
+      ],
+      "model_comparison_winner": "LinearRegression",
+      "selection_note": "All linear families tie within noise at CV R2 ~0.65; trees/SVR are worse. LinearRegression is kept because its local explanations are exact; it is only replaced if another family beats it by >=0.005 CV R2.",
+      "description": "Continuous Mental_Wellbeing_Score (0-10 scale)"
+    },
+    "wellbeing_risk_flag": {
+      "model": "RandomForestClassifier",
+      "test_accuracy": 0.8167,
+      "roc_auc": 0.8681,
+      "cv_accuracy_mean": 0.7625,
+      "cv_accuracy_std": 0.0371,
+      "confusion_matrix": [
+        [
+          105,
+          35
+        ],
+        [
+          20,
+          140
+        ]
+      ],
+      "confidence": "strong",
+      "feature_importance": [
+        {
+          "feature": "FOMO_Score",
+          "importance": 0.0922
+        },
+        {
+          "feature": "Scroll_Without_Purpose",
+          "importance": 0.0907
+        },
+        {
+          "feature": "Daily_Usage_Hours",
+          "importance": 0.0829
+        },
+        {
+          "feature": "Social_Comparison_Score",
+          "importance": 0.0829
+        },
+        {
+          "feature": "Validation_Seeking_Score",
+          "importance": 0.0784
+        },
+        {
+          "feature": "Offline_Relationship_Quality",
+          "importance": 0.0706
+        },
+        {
+          "feature": "First_Check_Morning",
+          "importance": 0.0669
+        },
+        {
+          "feature": "Notifications_Per_Day",
+          "importance": 0.0622
+        },
+        {
+          "feature": "Sleep_Hours",
+          "importance": 0.0565
+        },
+        {
+          "feature": "Screen_Free_Time_Hrs",
+          "importance": 0.0543
+        }
+      ],
+      "description": "Binary: predicted wellbeing above or below the training-set median"
+    }
+  },
+  "dead_targets_transparency": {
+    "Anxiety_Score": {
+      "max_abs_correlation": 0.0601,
+      "strongest_feature": "Posts_Per_Week",
+      "note": "Best cross-validated model (6 families tried, regression + binary + tercile classification) did not beat a naive baseline. Strongest single-feature correlation is only 0.06, indicating this outcome is not explained by the behavioral features in this dataset."
+    },
+    "Depression_Score": {
+      "max_abs_correlation": 0.0484,
+      "strongest_feature": "Platform_Snapchat",
+      "note": "Best cross-validated model (6 families tried, regression + binary + tercile classification) did not beat a naive baseline. Strongest single-feature correlation is only 0.05, indicating this outcome is not explained by the behavioral features in this dataset."
+    },
+    "Loneliness_Score": {
+      "max_abs_correlation": 0.0532,
+      "strongest_feature": "Tried_To_Cut_Back",
+      "note": "Best cross-validated model (6 families tried, regression + binary + tercile classification) did not beat a naive baseline. Strongest single-feature correlation is only 0.05, indicating this outcome is not explained by the behavioral features in this dataset."
+    },
+    "Self_Esteem_Score": {
+      "max_abs_correlation": 0.0587,
+      "strongest_feature": "Failed_To_Cut_Back",
+      "note": "Best cross-validated model (6 families tried, regression + binary + tercile classification) did not beat a naive baseline. Strongest single-feature correlation is only 0.06, indicating this outcome is not explained by the behavioral features in this dataset."
+    },
+    "Sleep_Quality_Score": {
+      "max_abs_correlation": 0.0646,
+      "strongest_feature": "Posts_Per_Week",
+      "note": "Best cross-validated model (6 families tried, regression + binary + tercile classification) did not beat a naive baseline. Strongest single-feature correlation is only 0.06, indicating this outcome is not explained by the behavioral features in this dataset."
+    },
+    "Productivity_Loss_Score": {
+      "max_abs_correlation": 0.0713,
+      "strongest_feature": "Platform_YouTube",
+      "note": "Best cross-validated model (6 families tried, regression + binary + tercile classification) did not beat a naive baseline. Strongest single-feature correlation is only 0.07, indicating this outcome is not explained by the behavioral features in this dataset."
+    }
+  }
+}

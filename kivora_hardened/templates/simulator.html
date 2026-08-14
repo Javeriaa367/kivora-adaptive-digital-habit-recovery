@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}What-If Simulator — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-4xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-display font-bold text-ink mb-2">What-If Simulator</h1>
+  <p class="text-slate-500 mb-2">See how the trained model's prediction changes if ONE input were different — everything else held at typical values.</p>
+  <p class="text-xs text-amber-600 bg-amber-100/60 border border-amber-300 rounded-lg px-3 py-2 mb-8">
+    <i class="fa-solid fa-circle-info mr-1"></i> This is model sensitivity, not a forecast — it does not predict what will happen to you in 30 days, only how the model's output shifts if this one input value were different, right now.
+  </p>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+    <label class="block text-sm font-semibold text-slate-600 mb-2">Which input to vary?</label>
+    <select id="field-select" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm mb-4">
+      {% for field in bounds %}<option value="{{ field }}">{{ field.replace('_',' ') }}</option>{% endfor %}
+    </select>
+    <button id="run-sim" class="bg-ink hover:bg-slate-800 text-white font-semibold text-sm px-6 py-2.5 rounded-xl">Run simulation</button>
+  </div>
+
+  <div id="sim-chart" class="bg-white rounded-2xl border border-slate-200 p-4"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script src="{{ url_for('static', filename='js/simulator.js') }}"></script>
+{% endblock %}

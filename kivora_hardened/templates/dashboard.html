@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Kivora{% endblock %}
+{% block content %}
+
+<section class="bg-ink bg-dot-grid pt-14 pb-16 px-5 sm:px-8">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+      <div>
+        <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-400/20 rounded-full px-3 py-1.5 mb-4">
+          <i class="fa-solid fa-circle-nodes"></i> Welcome back, {{ current_user_name }}
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-bold text-white leading-tight font-display">How are you doing?</h1>
+        <p class="text-slate-400 mt-2 max-w-xl">Your wellbeing command center — a snapshot of where things stand, and what to do next.</p>
+      </div>
+      <a href="{{ url_for('main.checkin') }}"
+         class="inline-flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-400 text-ink font-semibold text-sm px-5 py-3 rounded-xl shadow-lg transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Run a new Check-In
+      </a>
+    </div>
+
+    <!-- Current wellbeing snapshot -->
+    {% if latest %}
+    {% set r = latest.results %}
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div class="rounded-xl px-4 py-3 border {{ 'bg-coral-500/10 border-coral-400/30' if r.addiction_risk_flag.label == 'At-risk' else 'bg-white/5 border-white/10' }}">
+        <div class="flex items-center gap-2 text-slate-300 text-xs mb-1"><i class="fa-solid fa-triangle-exclamation text-teal-400"></i> Addiction Risk</div>
+        <div class="text-white font-display font-semibold text-lg">{{ r.addiction_risk_flag.label }}</div>
+      </div>
+      <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+        <div class="flex items-center gap-2 text-slate-300 text-xs mb-1"><i class="fa-solid fa-heart-pulse text-teal-400"></i> Wellbeing Score</div>
+        <div class="text-white font-display font-semibold text-lg">{{ r.wellbeing_score.value }} <span class="text-xs text-slate-400 font-normal">/ 10</span></div>
+      </div>
+      <div class="rounded-xl px-4 py-3 border {{ 'bg-amber-500/10 border-amber-400/30' if r.wellbeing_risk_flag.label != 'Above median' else 'bg-white/5 border-white/10' }}">
+        <div class="flex items-center gap-2 text-slate-300 text-xs mb-1"><i class="fa-solid fa-shield-heart text-teal-400"></i> Wellbeing Flag</div>
+        <div class="text-white font-display font-semibold text-lg">{{ r.wellbeing_risk_flag.label }}</div>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500 mt-3">From your check-in on {{ latest.created_at[:10] }}.
+      <a href="{{ url_for('main.weekly_report_pdf') }}" class="text-teal-400 hover:text-teal-300 font-semibold">Download PDF report <i class="fa-solid fa-file-pdf ml-0.5"></i></a> ·
+      <button type="button" id="email-report-btn" class="text-teal-400 hover:text-teal-300 font-semibold">Email me this report <i class="fa-solid fa-envelope ml-0.5"></i></button>
+    </p>
+    <div id="email-report-status" class="hidden text-xs font-semibold mt-2"></div>
+    {% else %}
+    <div class="bg-white/5 border border-white/10 rounded-2xl px-6 py-8 text-center">
+      <p class="text-slate-300 mb-4">You haven't run a Check-In yet — do one now to see your wellbeing snapshot here.</p>
+      <a href="{{ url_for('main.checkin') }}" class="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-ink font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Run your first Check-In
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="max-w-5xl mx-auto px-5 sm:px-8 -mt-8 pb-24 relative z-10 space-y-8">
+
+  <!-- Recovery Plan progress -->
+  <div id="recovery-progress" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <div class="flex items-center gap-3 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Loading your recovery plan…</div>
+  </div>
+
+  <!-- Personalized recommendations -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+      <p class="text-xs text-teal-600 font-semibold uppercase mb-1"><i class="fa-solid fa-sun mr-1"></i>Motivation</p>
+      <p class="text-sm text-slate-600">{{ daily_coach.motivation }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+      <p class="text-xs text-teal-600 font-semibold uppercase mb-1"><i class="fa-solid fa-lightbulb mr-1"></i>Today's Tip</p>
+      <p class="text-sm text-slate-600">{{ daily_coach.tip }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+      <p class="text-xs text-teal-600 font-semibold uppercase mb-1"><i class="fa-solid fa-comment-dots mr-1"></i>Reflect</p>
+      <p class="text-sm text-slate-600">{{ daily_coach.reflection_question }}</p>
+    </div>
+  </div>
+
+  <!-- Daily challenge -->
+  <div id="daily-challenge" class="bg-teal-50 border border-teal-200 rounded-2xl p-5"></div>
+
+  <!-- Your Trends -->
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-display font-bold text-ink">Your trends</h2>
+      <a href="{{ url_for('main.weekly_report_pdf') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700">
+        <i class="fa-solid fa-file-pdf"></i> View / Download report
+      </a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="stat-cards"></div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-4">
+      <p class="text-sm font-semibold text-slate-500 uppercase mb-3 px-2">Journal activity — last 90 days</p>
+      <div id="calendar-heatmap"></div>
+    </div>
+
+    <div id="badges-section" class="bg-white rounded-2xl border border-slate-200 p-5 mb-6">
+      <p class="text-sm font-semibold text-slate-500 uppercase mb-3">Badges earned</p>
+      <div id="badges-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+    </div>
+
+    <div id="wellbeing-trend-chart" class="bg-white rounded-2xl border border-slate-200 p-4 mb-4"></div>
+    <div id="mood-distribution-chart" class="bg-white rounded-2xl border border-slate-200 p-4"></div>
+  </div>
+
+  <!-- Quick actions -->
+  <div>
+    <h2 class="text-xl font-display font-bold text-ink mb-4">Quick actions</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <a href="{{ url_for('main.checkin') }}" class="flex flex-col items-center text-center gap-2 bg-white border border-slate-200 hover:border-teal-400 rounded-2xl p-5 transition-colors">
+        <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+        <span class="text-sm font-semibold text-ink">Run Check-In</span>
+      </a>
+      <a href="{{ url_for('journal.journal_page') }}" class="flex flex-col items-center text-center gap-2 bg-white border border-slate-200 hover:border-teal-400 rounded-2xl p-5 transition-colors">
+        <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600"><i class="fa-solid fa-book"></i></span>
+        <span class="text-sm font-semibold text-ink">Write Journal</span>
+      </a>
+      <a href="{{ url_for('companion.companion_page') }}" class="flex flex-col items-center text-center gap-2 bg-white border border-slate-200 hover:border-teal-400 rounded-2xl p-5 transition-colors">
+        <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600"><i class="fa-solid fa-comment-dots"></i></span>
+        <span class="text-sm font-semibold text-ink">Talk to Companion</span>
+      </a>
+      <a href="{{ url_for('recovery.recovery_page') }}" class="flex flex-col items-center text-center gap-2 bg-white border border-slate-200 hover:border-teal-400 rounded-2xl p-5 transition-colors">
+        <span class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600"><i class="fa-solid fa-route"></i></span>
+        <span class="text-sm font-semibold text-ink">Continue Recovery Plan</span>
+      </a>
+    </div>
+  </div>
+
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

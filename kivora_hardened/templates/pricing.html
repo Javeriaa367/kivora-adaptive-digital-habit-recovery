@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Pricing — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-4xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-display font-bold text-ink mb-2 text-center">Plans</h1>
+  <p class="text-slate-500 mb-10 text-center">Free plan includes {{ daily_limit }} assessments/day. Premium is unlimited.</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6">
+      <h3 class="font-display font-bold text-lg text-ink mb-1">Free</h3>
+      <p class="text-3xl font-display font-bold text-ink mb-4">$0</p>
+      <ul class="space-y-2 text-sm text-slate-600">
+        <li><i class="fa-solid fa-check text-teal-500 mr-2"></i>{{ daily_limit }} assessments / day</li>
+        <li><i class="fa-solid fa-check text-teal-500 mr-2"></i>Journal + mood tracking</li>
+        <li><i class="fa-solid fa-check text-teal-500 mr-2"></i>Habit builder</li>
+      </ul>
+    </div>
+    <div class="bg-ink rounded-2xl p-6 relative overflow-hidden">
+      <span class="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wide bg-teal-400 text-ink px-2 py-1 rounded-full">Popular</span>
+      <h3 class="font-display font-bold text-lg text-white mb-1">Premium</h3>
+      <p class="text-3xl font-display font-bold text-white mb-4">$9<span class="text-sm text-slate-400">/mo</span></p>
+      <ul class="space-y-2 text-sm text-slate-300 mb-6">
+        <li><i class="fa-solid fa-check text-teal-400 mr-2"></i>Unlimited check-ins &amp; assessments</li>
+        <li><i class="fa-solid fa-check text-teal-400 mr-2"></i>Full assessment history &amp; trends</li>
+        <li><i class="fa-solid fa-check text-teal-400 mr-2"></i>Data export anytime</li>
+      </ul>
+      <button id="upgrade-btn" class="w-full bg-teal-500 hover:bg-teal-400 text-ink font-semibold py-3 rounded-xl transition-colors">
+        {% if stripe_configured %}Upgrade now{% else %}Upgrade (demo — payments not configured){% endif %}
+      </button>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6">
+    <h3 class="font-display font-semibold text-ink mb-3">Have a coupon?</h3>
+    <form id="coupon-form" class="flex gap-2">
+      <input id="coupon-input" type="text" placeholder="COUPON CODE" class="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm uppercase">
+      <button type="submit" class="bg-ink text-white text-sm font-semibold px-5 py-2.5 rounded-xl">Apply</button>
+    </form>
+    <p id="coupon-result" class="text-sm mt-2"></p>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('upgrade-btn').addEventListener('click', async () => {
+  const res = await fetch('/api/billing/checkout', { method: 'POST' });
+  const data = await res.json();
+  if (data.ok) { window.location.href = data.checkout_url; }
+  else { alert(data.error); }
+});
+document.getElementById('coupon-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const code = document.getElementById('coupon-input').value.trim();
+  const res = await fetch('/api/billing/redeem-coupon', {
+    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({code})
+  });
+  const data = await res.json();
+  const el = document.getElementById('coupon-result');
+  el.textContent = data.ok ? `Applied! ${data.discount_percent}% off.` : data.error;
+  el.className = 'text-sm mt-2 ' + (data.ok ? 'text-teal-600' : 'text-coral-600');
+});
+</script>
+{% endblock %}

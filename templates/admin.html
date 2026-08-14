@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Admin — Kivora{% endblock %}
+{% block content %}
+<section class="max-w-6xl mx-auto px-5 sm:px-8 py-16">
+  <h1 class="text-3xl font-display font-bold text-ink mb-8">Admin Dashboard</h1>
+
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10">
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Total Users</p><p class="text-2xl font-display font-bold text-ink">{{ stats.total_users }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Premium</p><p class="text-2xl font-display font-bold text-teal-600">{{ stats.plan_breakdown.premium or 0 }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Journal Entries</p><p class="text-2xl font-display font-bold text-ink">{{ stats.total_journal_entries }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Predictions Run</p><p class="text-2xl font-display font-bold text-ink">{{ stats.total_predictions }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Crisis Flags</p><p class="text-2xl font-display font-bold text-coral-600">{{ stats.crisis_flags_total }}</p></div>
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">App Analytics (30 days)</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Active Users</p><p class="text-2xl font-display font-bold text-ink">{{ analytics.active_users }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">New Users</p><p class="text-2xl font-display font-bold text-teal-600">{{ analytics.new_users }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Journal Entries</p><p class="text-2xl font-display font-bold text-ink">{{ analytics.journal_entries }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Predictions</p><p class="text-2xl font-display font-bold text-ink">{{ analytics.predictions }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Avg. Sentiment</p><p class="text-2xl font-display font-bold text-ink">{{ '%.2f'|format(analytics.average_sentiment) if analytics.average_sentiment is not none else '—' }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Crisis Flags</p><p class="text-2xl font-display font-bold text-coral-600">{{ analytics.crisis_flags }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Recovery Plans Started</p><p class="text-2xl font-display font-bold text-teal-600">{{ analytics.recovery_plans_started }}</p></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-xs text-slate-400">Brain Exercise Avg</p><p class="text-2xl font-display font-bold text-ink">{{ '%.0f'|format(analytics.brain_average_score) if analytics.brain_average_score is not none else '—' }}</p></div>
+  </div>
+  <div class="grid md:grid-cols-2 gap-4 mb-10">
+    <div class="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 class="text-sm font-display font-semibold text-ink mb-3">Emotion Distribution</h3>
+      {% if analytics.emotion_distribution %}
+      <div class="space-y-2">
+        {% for label, count in analytics.emotion_distribution.items() %}
+        <div class="flex items-center justify-between text-sm">
+          <span class="capitalize text-slate-600">{{ label.replace('_', ' ') }}</span>
+          <span class="font-mono-data text-slate-500">{{ count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}<p class="text-sm text-slate-400">No entries in the last 30 days.</p>{% endif %}
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 class="text-sm font-display font-semibold text-ink mb-3">Risk Snapshot Summary</h3>
+      {% if analytics.risk_summary %}
+      {% for category, levels in analytics.risk_summary.items() %}
+      <div class="mb-2">
+        <p class="text-xs uppercase text-slate-400 font-semibold">{{ category.replace('_', ' ') }}</p>
+        <div class="flex gap-2 text-sm">
+          {% for level, count in levels.items() %}
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold
+            {% if level in ('high', 'very_high') %}bg-coral-100 text-coral-600
+            {% elif level == 'medium' %}bg-amber-100 text-amber-600
+            {% else %}bg-teal-100 text-teal-700{% endif %}">{{ level }}: {{ count }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}<p class="text-sm text-slate-400">No risk snapshots in the last 30 days.</p>{% endif %}
+    </div>
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Users</h2>
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto mb-10">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-xs uppercase"><tr>
+        <th class="text-left px-4 py-3">Name</th><th class="text-left px-4 py-3">Email</th>
+        <th class="text-left px-4 py-3">Plan</th><th class="text-left px-4 py-3">Role</th>
+        <th class="text-left px-4 py-3">Churn Risk</th><th class="text-left px-4 py-3">Status</th>
+        <th class="text-left px-4 py-3">Joined</th><th class="text-left px-4 py-3"></th>
+      </tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-3">{{ u.name }}</td>
+          <td class="px-4 py-3 text-slate-500">{{ u.email }}</td>
+          <td class="px-4 py-3">
+            <select data-user-id="{{ u.id }}" class="plan-select text-xs rounded-lg border border-slate-300 px-2 py-1">
+              <option value="free" {% if u.plan == 'free' %}selected{% endif %}>Free</option>
+              <option value="premium" {% if u.plan == 'premium' %}selected{% endif %}>Premium</option>
+            </select>
+          </td>
+          <td class="px-4 py-3">
+            {% if viewer_role == 'super_admin' %}
+            <select data-user-id="{{ u.id }}" class="role-select text-xs rounded-lg border border-slate-300 px-2 py-1">
+              {% for r in valid_roles %}
+              <option value="{{ r }}" {% if u.role == r %}selected{% endif %}>{{ r.replace('_', ' ') }}</option>
+              {% endfor %}
+            </select>
+            {% else %}
+            <span class="text-xs font-semibold px-2 py-1 rounded-full {% if u.role == 'super_admin' %}bg-amber-100 text-amber-600{% elif u.role == 'admin' %}bg-teal-100 text-teal-700{% else %}bg-slate-100 text-slate-500{% endif %}">{{ u.role.replace('_', ' ') }}</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3">
+            <span class="text-xs font-semibold px-2 py-1 rounded-full
+              {% if u.churn.level == 'high' %}bg-coral-100 text-coral-600
+              {% elif u.churn.level == 'medium' %}bg-amber-100 text-amber-600
+              {% else %}bg-teal-100 text-teal-700{% endif %}"
+              title="{{ u.churn.reasons|join(', ') }}">{{ u.churn.level }}</span>
+          </td>
+          <td class="px-4 py-3">
+            {% if u.account_status == 'suspended' %}
+            <button data-user-id="{{ u.id }}" data-status="active" class="status-btn text-xs font-semibold px-2 py-1 rounded-full bg-coral-100 text-coral-600 hover:bg-coral-200">Suspended · Activate</button>
+            {% else %}
+            <button data-user-id="{{ u.id }}" data-status="suspended" class="status-btn text-xs font-semibold px-2 py-1 rounded-full bg-teal-100 text-teal-700 hover:bg-teal-200">Active · Suspend</button>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 text-slate-400 text-xs">{{ u.created_at[:10] }}</td>
+          <td class="px-4 py-3 text-right">
+            <button data-user-id="{{ u.id }}" class="user-detail-btn text-xs font-semibold text-teal-600 hover:text-teal-700">Details</button>
+          </td>
+        </tr>
+        <tr id="user-detail-row-{{ u.id }}" class="user-detail-row hidden border-t border-slate-100 bg-slate-50/60">
+          <td colspan="8" class="px-4 py-4"><div class="text-sm text-slate-600">Loading…</div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="text-xs text-slate-400 mb-10">Churn risk is a heuristic (days since last activity), not a trained ML model — hover a badge for why. Raw journal and memory text is never shown here — it stays encrypted at rest.</p>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">System &amp; AI Configuration</h2>
+  <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-10">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+      {% for key, label in [('gemini_configured', 'Gemini AI'), ('google_oauth_enabled', 'Google Sign-In'), ('stripe_enabled', 'Stripe Billing'), ('smtp_enabled', 'Email (SMTP)'), ('persistence_bucket', 'Backup Bucket'), ('persistence_dir', 'Backup Dir')] %}
+      {% set value = system_config.get(key) %}
+      <div class="border border-slate-100 rounded-lg px-3 py-2">
+        <p class="text-xs text-slate-400">{{ label }}</p>
+        <p class="font-semibold text-ink {% if value is sameas true or value is sameas false %}capitalize{% endif %}">
+          {%- if value is sameas true %}Enabled{% elif value is sameas false %}Disabled{% elif value %}Yes · {{ value }}{% else %}Not configured{% endif -%}
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="text-xs text-slate-400 mt-3">Super Admin: {{ system_config.super_admin_email or 'not set (see .env SUPER_ADMIN_EMAIL)' }} · Env: {{ system_config.flask_env or 'development' }}</p>
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Audit Log</h2>
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto mb-10">
+    {% if audit_log %}
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-xs uppercase"><tr>
+        <th class="text-left px-4 py-3">When</th><th class="text-left px-4 py-3">Admin</th>
+        <th class="text-left px-4 py-3">Action</th><th class="text-left px-4 py-3">Target</th>
+        <th class="text-left px-4 py-3">Details</th>
+      </tr></thead>
+      <tbody>
+        {% for a in audit_log %}
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">{{ a.created_at[:16].replace('T', ' ') }}</td>
+          <td class="px-4 py-3">{{ a.admin_email or ('#' ~ a.admin_user_id if a.admin_user_id else '—') }}</td>
+          <td class="px-4 py-3 font-mono-data text-xs">{{ a.action }}</td>
+          <td class="px-4 py-3 text-slate-500">{{ a.target_email or ('#' ~ a.target_user_id if a.target_user_id else '—') }}</td>
+          <td class="px-4 py-3 text-slate-500 text-xs">{{ a.details }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="px-5 py-4 text-sm text-slate-400">No privileged actions logged yet.</p>{% endif %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Crisis Flags</h2>
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto mb-10">
+    {% if crisis_log %}
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-xs uppercase"><tr>
+        <th class="text-left px-4 py-3">User</th><th class="text-left px-4 py-3">Email</th>
+        <th class="text-left px-4 py-3">Emotion</th><th class="text-left px-4 py-3">Sentiment</th>
+        <th class="text-left px-4 py-3">Score</th><th class="text-left px-4 py-3">When</th>
+      </tr></thead>
+      <tbody>
+        {% for f in crisis_log %}
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-3">{{ f.name }}</td>
+          <td class="px-4 py-3 text-slate-500">{{ f.email }}</td>
+          <td class="px-4 py-3 capitalize">{{ f.emotion_label.replace('_', ' ') }}</td>
+          <td class="px-4 py-3 capitalize">{{ f.overall_sentiment }}</td>
+          <td class="px-4 py-3">{{ '%.2f'|format(f.sentiment_score) if f.sentiment_score is not none else '—' }}</td>
+          <td class="px-4 py-3 text-slate-400 text-xs">{{ f.created_at[:10] }} {{ f.created_at[11:16] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="px-5 py-4 text-sm text-slate-400">No crisis-flagged entries.</p>{% endif %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">High-Risk Users</h2>
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto mb-10">
+    {% if risk_users %}
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-xs uppercase"><tr>
+        <th class="text-left px-4 py-3">User</th><th class="text-left px-4 py-3">Email</th>
+        <th class="text-left px-4 py-3">Category</th><th class="text-left px-4 py-3">Level</th>
+        <th class="text-left px-4 py-3">Score</th><th class="text-left px-4 py-3">Last Check</th>
+      </tr></thead>
+      <tbody>
+        {% for r in risk_users %}
+        <tr class="border-t border-slate-100">
+          <td class="px-4 py-3">{{ r.name }}</td>
+          <td class="px-4 py-3 text-slate-500">{{ r.email }}</td>
+          <td class="px-4 py-3 capitalize">{{ r.category.replace('_', ' ') }}</td>
+          <td class="px-4 py-3"><span class="text-xs font-semibold px-2 py-1 rounded-full bg-coral-100 text-coral-600">{{ r.level.replace('_', ' ') }}</span></td>
+          <td class="px-4 py-3">{{ r.score }}</td>
+          <td class="px-4 py-3 text-slate-400 text-xs">{{ r.created_at[:10] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="px-5 py-4 text-sm text-slate-400">No users currently flagged high / very-high risk.</p>{% endif %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Database</h2>
+  <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mb-4">
+      {% for table, count in db_stats.tables.items() %}
+      <div class="flex items-center justify-between border border-slate-100 rounded-lg px-3 py-2">
+        <span class="text-slate-500">{{ table.replace('_', ' ') }}</span>
+        <span class="font-mono-data text-ink">{{ count if count is not none else '—' }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="text-xs text-slate-400">Size: {{ (db_stats.size_bytes / 1024)|round(1) if db_stats.size_bytes else 0 }} KB · {{ db_stats.db_path or 'in-memory' }}</p>
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Create Coupon</h2>
+  <form id="coupon-form" class="flex gap-2 mb-10">
+    <input id="c-code" placeholder="CODE" class="rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase">
+    <input id="c-discount" type="number" min="1" max="100" placeholder="% off" class="w-24 rounded-xl border border-slate-300 px-3 py-2 text-sm">
+    <input id="c-uses" type="number" min="1" value="1" placeholder="Max uses" class="w-28 rounded-xl border border-slate-300 px-3 py-2 text-sm">
+    <button class="bg-ink text-white text-sm font-semibold px-4 py-2 rounded-xl">Create</button>
+  </form>
+  <div class="mb-10 space-y-2">
+    {% for c in coupons %}
+    <div class="text-sm text-slate-600 bg-white border border-slate-200 rounded-lg px-4 py-2 flex justify-between">
+      <span class="font-mono-data">{{ c.code }}</span><span>{{ c.discount_percent }}% off — {{ c.uses_count }}/{{ c.max_uses }} used</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Pending Testimonials</h2>
+  <div class="space-y-2 mb-10">
+    {% for t in pending_testimonials %}
+    {% if not t.approved %}
+    <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+      <div><p class="text-sm text-slate-700">"{{ t.quote }}"</p><p class="text-xs text-slate-400">— {{ t.user_name }}</p></div>
+      <button data-id="{{ t.id }}" class="approve-testimonial-btn bg-teal-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">Approve</button>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <h2 class="text-lg font-display font-semibold text-ink mb-3">Recent Feedback</h2>
+  <div class="space-y-2">
+    {% for f in feedback %}
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <p class="text-sm text-slate-700">{{ f.message }}</p>
+      <p class="text-xs text-slate-400 mt-1">— {{ f.user_name }} {% if f.rating %}· {{ f.rating }}/5{% endif %}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

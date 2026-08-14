@@ -1,0 +1,64 @@
+# Core app
+Flask==3.1.3
+Werkzeug==3.1.3
+
+# Field-level encryption at rest (crypto_fields.py) for journal.entry_text
+# and memory_facts.fact_text/normalized_text -- needs ENCRYPTION_KEY set in
+# production (fails closed at startup otherwise, same as SECRET_KEY).
+cryptography>=42.0
+scikit-learn==1.8.0
+pandas==3.0.2
+numpy>=1.26
+joblib>=1.3
+python-dotenv>=1.0.0
+
+# Gemini chatbot (ml/chatbot.py) -- needs GEMINI_API_KEY env var set
+# Google is migrating keys from the old "AIza..." Standard format to a new
+# "AQ.Ab..." Auth key format (Standard keys stop working entirely in
+# Sept 2026). Pinned above the versions with reported AQ.-key rejections.
+google-genai>=1.0.0
+
+# Billing (routes/billing.py) -- needs STRIPE_SECRET_KEY etc, untested live
+stripe>=9.0
+
+# Google OAuth login (routes/auth.py) -- needs GOOGLE_CLIENT_ID/SECRET, untested live
+Authlib>=1.3
+
+# Durable persistence (database/persistence.py) -- OPTIONAL. Only needed
+# when PERSISTENCE_BACKUP_BUCKET is set (GCS backup/restore so data
+# survives Cloud Run redeploys). Local dev with PERSISTENCE_BACKUP_DIR
+# works without this. Cloud Run authenticates automatically via
+# Application Default Credentials.
+google-cloud-storage>=2.0
+
+# Weekly PDF report generation (ml/weekly_report.py)
+reportlab>=4.0
+
+# Journal analysis (ml/emotion_analyzer_hybrid.py) -- the app now runs the
+# hybrid analyzer by default (see app.py's create_app). Both packages below
+# are OPTIONAL: if either is missing, or a model fails to download, the
+# hybrid analyzer detects that at load time and falls back gracefully
+# (VADER-only, transformer-only, or plain lexical) -- the Journal never
+# crashes for lack of these. Install both for the full hybrid pipeline.
+# Verified against this project's Python (3.12) -- both ranges below have
+# published wheels for 3.12.
+
+# Cheap, pure-Python, no model download: VADER sentiment
+# (ml/emotion_analyzer_vader.py). `pip install -r requirements.txt` covers
+# this one -- nothing extra needed.
+vaderSentiment>=3.3.2
+
+# Transformer emotion classification (ml/emotion_analyzer_transformer.py),
+# model: j-hartmann/emotion-english-distilroberta-base. transformers is a
+# normal PyPI package (`pip install -r requirements.txt` covers it), but it
+# does NOT pull in torch as a hard dependency -- torch must be installed
+# separately (see below) because the CPU-only wheel isn't on the default
+# PyPI index for every platform, and we don't want a plain
+# `pip install -r requirements.txt` to silently grab a much larger
+# GPU/CUDA build by accident.
+transformers>=4.40,<5
+
+# torch: install this ONE separately, it is intentionally NOT listed above.
+#   python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+# (torch>=2.2 is required for Python 3.12 wheels; the command above
+# resolves to a current compatible CPU build automatically.)

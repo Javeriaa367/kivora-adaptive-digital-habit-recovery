@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Let's get you set up — Kivora{% endblock %}
+{% block content %}
+
+<section class="bg-ink bg-dot-grid pt-16 pb-24 px-5 sm:px-8">
+  <div class="max-w-3xl mx-auto text-center">
+    <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-400/20 rounded-full px-3 py-1.5 mb-4">
+      <i class="fa-solid fa-route"></i> 3 quick steps
+    </span>
+    <h1 class="text-3xl sm:text-4xl font-bold text-white leading-tight mb-3 font-display">Let's get you set up, {{ current_user_name }}</h1>
+    <p class="text-slate-400 max-w-xl mx-auto">Three short steps and your dashboard is ready to work for you. About 5 minutes total.</p>
+  </div>
+</section>
+
+<section class="max-w-3xl mx-auto px-5 sm:px-8 -mt-14 pb-24 relative z-10 space-y-4">
+
+  <!-- Step 1: Check-In -->
+  <div class="bg-white rounded-2xl border {{ 'border-teal-400 ring-4 ring-teal-100' if not onboard_state.has_prediction else 'border-slate-200' }} shadow-sm p-6 flex items-start gap-4">
+    <div class="flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center
+      {{ 'bg-teal-500 text-white' if onboard_state.has_prediction else 'bg-teal-50 text-teal-600' }}">
+      {% if onboard_state.has_prediction %}
+      <i class="fa-solid fa-check"></i>
+      {% else %}
+      <span class="font-display font-bold">1</span>
+      {% endif %}
+    </div>
+    <div class="flex-1">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="font-display font-semibold text-ink">Run your first Check-In</h2>
+          <p class="text-sm text-slate-500 mt-1">A few questions about your phone habits. You get your addiction risk, wellbeing score and what they mean — explained in plain language.</p>
+        </div>
+        {% if not onboard_state.has_prediction %}
+        <a href="{{ url_for('main.checkin', onboard=1) }}" class="inline-flex items-center justify-center gap-2 bg-ink hover:bg-slate-800 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap">
+          Start Check-In <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        {% endif %}
+      </div>
+      {% if onboard_state.has_prediction %}
+      <p class="text-xs text-teal-600 font-semibold mt-2"><i class="fa-solid fa-circle-check mr-1"></i>Done — your results are in. Want to see them again?</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Step 2: Results (automatic, same page as Check-In) -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex items-start gap-4">
+    <div class="flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center
+      {{ 'bg-teal-500 text-white' if onboard_state.has_prediction else 'bg-slate-100 text-slate-400' }}">
+      {% if onboard_state.has_prediction %}
+      <i class="fa-solid fa-check"></i>
+      {% else %}
+      <span class="font-display font-bold">2</span>
+      {% endif %}
+    </div>
+    <div class="flex-1">
+      <h2 class="font-display font-semibold text-ink">See what your answers mean</h2>
+      <p class="text-sm text-slate-500 mt-1">Your Check-In explains each prediction — why it looks the way it does, and what's safe to act on. This happens automatically the moment you submit.</p>
+      {% if not onboard_state.has_prediction %}
+      <p class="text-xs text-slate-400 mt-2">Comes free with Step 1 — no extra effort.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Step 3: First journal entry -->
+  <div class="bg-white rounded-2xl border {{ 'border-teal-400 ring-4 ring-teal-100' if onboard_state.has_prediction and not onboard_state.has_journal else 'border-slate-200' }} shadow-sm p-6 flex items-start gap-4">
+    <div class="flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center
+      {{ 'bg-teal-500 text-white' if onboard_state.has_journal else ('bg-teal-50 text-teal-600' if onboard_state.has_prediction else 'bg-slate-100 text-slate-400') }}">
+      {% if onboard_state.has_journal %}
+      <i class="fa-solid fa-check"></i>
+      {% else %}
+      <span class="font-display font-bold">3</span>
+      {% endif %}
+    </div>
+    <div class="flex-1">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="font-display font-semibold text-ink">Write your first journal entry</h2>
+          <p class="text-sm text-slate-500 mt-1">Two sentences about your day. We detect the mood, spot patterns over time, and build your long-term memory — that's what powers your weekly report.</p>
+        </div>
+        {% if onboard_state.has_prediction and not onboard_state.has_journal %}
+        <a href="{{ url_for('journal.journal_page', onboard=1) }}" class="inline-flex items-center justify-center gap-2 bg-ink hover:bg-slate-800 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap">
+          Write entry <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        {% endif %}
+      </div>
+      {% if onboard_state.has_journal %}
+      <p class="text-xs text-teal-600 font-semibold mt-2"><i class="fa-solid fa-circle-check mr-1"></i>Done.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if onboard_state.completed %}
+  <div class="bg-teal-50 border border-teal-200 rounded-2xl p-6 text-center">
+    <p class="font-display font-semibold text-teal-700 mb-2"><i class="fa-solid fa-party-horn mr-2"></i>You're all set!</p>
+    <p class="text-sm text-slate-600 mb-4">Your dashboard is live with your snapshot, trends and recovery plan.</p>
+    <a href="{{ url_for('main.dashboard') }}" class="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-ink font-semibold text-sm px-6 py-3 rounded-xl transition-colors">
+      Go to Dashboard <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+  {% else %}
+  <div class="text-center pt-2">
+    <a href="{{ url_for('main.dashboard') }}" class="text-sm font-semibold text-slate-400 hover:text-teal-600 transition-colors">I'll finish this later — take me to the dashboard anyway</a>
+  </div>
+  {% endif %}
+
+</section>
+
+{% endblock %}

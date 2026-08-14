@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>{% block title %}Kivora{% endblock %}</title>
+
+<script>
+  (function () {
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    if (!meta || !window.fetch) return;
+    var csrf = meta.content;
+    var origFetch = window.fetch;
+    window.fetch = function (url, opts) {
+      opts = opts || {};
+      var method = (opts.method || 'GET').toUpperCase();
+      if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS' && method !== 'TRACE') {
+        opts.headers = new Headers(opts.headers || {});
+        if (!opts.headers.has('X-CSRF-Token')) {
+          opts.headers.set('X-CSRF-Token', csrf);
+        }
+      }
+      return origFetch.call(this, url, opts);
+    };
+  })();
+</script>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+        colors: {
+          ink: '#0B1120',
+          teal: { 50: '#EDFBF9', 100: '#D7F5EE', 400: '#2DD4C4', 500: '#0EA5A0', 600: '#0C8A86', 700: '#0A6E6C' },
+          coral: { 100: '#FDE3E4', 500: '#F2545B', 600: '#DC3A42' },
+          amber: { 100: '#FCEACC', 500: '#F5A524', 600: '#D4890F' },
+        },
+      },
+    },
+  };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% block head %}{% endblock %}
+</head>
+<body class="text-slate-800 antialiased bg-slate-50 font-body">
+
+<header class="fixed top-0 inset-x-0 z-50 bg-ink/90 backdrop-blur-lg border-b border-white/10">
+  <nav class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="{{ url_for('main.index') if not session.get('user_id') else url_for('main.dashboard') }}" class="flex items-center gap-2.5">
+      <span class="w-8 h-8 rounded-lg bg-teal-500/15 border border-teal-400/30 flex items-center justify-center">
+        <i class="fa-solid fa-wave-square text-teal-400 text-sm"></i>
+      </span>
+      <span class="font-display font-semibold text-white tracking-tight">Kivora<span class="text-teal-400">.</span></span>
+    </a>
+
+    {% set more_endpoints = ['memory.memory_page', 'main.tips', 'faq.faq_page', 'billing.pricing', 'feedback.feedback_page'] %}    {% if session.get('user_id') %}
+    <div class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
+      <a href="{{ url_for('main.dashboard') }}" class="hover:text-white transition-colors {% if request.endpoint == 'main.dashboard' %}text-teal-400{% endif %}">Dashboard</a>
+      <a href="{{ url_for('main.checkin') }}" class="hover:text-white transition-colors {% if request.endpoint == 'main.checkin' %}text-teal-400{% endif %}">Check-In</a>
+      <a href="{{ url_for('journal.journal_page') }}" class="hover:text-white transition-colors {% if request.endpoint == 'journal.journal_page' %}text-teal-400{% endif %}">Journal</a>
+      <a href="{{ url_for('risk.risk_page') }}" class="hover:text-white transition-colors {% if request.endpoint == 'risk.risk_page' %}text-teal-400{% endif %}">Risk Insights</a>
+      <a href="{{ url_for('recovery.recovery_page') }}" class="hover:text-white transition-colors {% if request.endpoint == 'recovery.recovery_page' %}text-teal-400{% endif %}">Recovery Plan</a>
+      <a href="{{ url_for('companion.companion_page') }}" class="hover:text-white transition-colors {% if request.endpoint == 'companion.companion_page' %}text-teal-400{% endif %}">Companion</a>
+      <a href="{{ url_for('habits.habits_page') }}" class="hover:text-white transition-colors {% if request.endpoint == 'habits.habits_page' %}text-teal-400{% endif %}">Habits</a>
+
+      <div id="more-widget" class="relative">
+        <button id="more-toggle" type="button" class="flex items-center gap-1.5 hover:text-white transition-colors {% if request.endpoint in more_endpoints %}text-teal-400{% endif %}">
+          More <i class="fa-solid fa-chevron-down text-[10px]"></i>
+        </button>
+        <div id="more-panel" class="hidden absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden text-slate-600">
+          <div class="px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Explore &amp; Tools</div>
+          <a href="{{ url_for('memory.memory_page') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 hover:text-teal-600">Memory</a>
+          <a href="{{ url_for('main.tips') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 hover:text-teal-600">Well-being Tips</a>
+          <div class="border-t border-slate-100 mt-1 px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Support</div>
+          <a href="{{ url_for('faq.faq_page') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 hover:text-teal-600">FAQ</a>
+          <a href="{{ url_for('billing.pricing') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 hover:text-teal-600">Pricing</a>
+          <a href="{{ url_for('feedback.feedback_page') }}" class="block px-4 py-2 text-sm hover:bg-slate-50 hover:text-teal-600 pb-3">Feedback</a>
+        </div>
+      </div>
+
+      {% if current_user_is_admin %}<a href="{{ url_for('admin.admin_dashboard') }}" class="hover:text-white transition-colors text-amber-400">Admin</a>{% endif %}
+    </div>
+    <button id="dark-toggle" class="hidden md:inline-flex text-slate-300 hover:text-white w-8 h-8 items-center justify-center" aria-label="Toggle dark mode">
+      <i class="fa-solid fa-moon"></i>
+    </button>
+    <div id="notif-widget" class="hidden md:block relative">
+      <button id="notif-toggle" class="text-slate-300 hover:text-white w-8 h-8 flex items-center justify-center relative" aria-label="Notifications">
+        <i class="fa-solid fa-bell"></i>
+        <span id="notif-badge" class="hidden absolute top-0 right-0 w-2 h-2 rounded-full bg-coral-500"></span>
+      </button>
+      <div id="notif-panel" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+          <span class="text-sm font-semibold text-ink">Notifications</span>
+          <button id="notif-clear" class="text-xs text-teal-600 font-semibold">Mark all read</button>
+        </div>
+        <div id="notif-list" class="max-h-72 overflow-y-auto"></div>
+      </div>
+    </div>
+    <div class="hidden md:flex items-center gap-4">
+      <a href="{{ url_for('settings.settings_page') }}" class="text-xs text-slate-400 hover:text-teal-400 transition-colors flex items-center gap-1.5" title="Settings">
+        <i class="fa-solid fa-gear"></i>{{ current_user_name }}
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="text-sm font-semibold text-white bg-white/10 hover:bg-white/15 px-4 py-2 rounded-lg border border-white/10 transition-colors">Log out</a>
+    </div>
+    {% else %}
+    <div class="hidden md:flex items-center gap-4">
+      <a href="{{ url_for('auth.login') }}" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Log in</a>
+      <a href="{{ url_for('auth.signup') }}" class="text-sm font-semibold text-white bg-teal-500 hover:bg-teal-400 text-ink px-4 py-2 rounded-lg transition-colors">Sign up</a>
+    </div>
+    {% endif %}
+
+    <button id="menu-toggle" class="md:hidden text-white text-xl" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+  </nav>
+
+  <div id="mobile-menu" class="hidden md:hidden bg-ink border-t border-white/10 px-5 py-4 space-y-3 text-slate-300 text-sm font-medium">
+    {% if session.get('user_id') %}
+      <a href="{{ url_for('main.dashboard') }}" class="block hover:text-white">Dashboard</a>
+      <a href="{{ url_for('main.checkin') }}" class="block hover:text-white">Check-In</a>
+      <a href="{{ url_for('journal.journal_page') }}" class="block hover:text-white">Journal</a>
+      <a href="{{ url_for('risk.risk_page') }}" class="block hover:text-white">Risk Insights</a>
+      <a href="{{ url_for('recovery.recovery_page') }}" class="block hover:text-white">Recovery Plan</a>
+      <a href="{{ url_for('companion.companion_page') }}" class="block hover:text-white">Companion</a>
+      <a href="{{ url_for('habits.habits_page') }}" class="block hover:text-white">Habits</a>
+
+      <p class="pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Explore &amp; Tools</p>
+      <a href="{{ url_for('memory.memory_page') }}" class="block hover:text-white">Memory</a>
+      <a href="{{ url_for('main.tips') }}" class="block hover:text-white">Well-being Tips</a>
+
+      <p class="pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Support</p>
+      <a href="{{ url_for('faq.faq_page') }}" class="block hover:text-white">FAQ</a>
+      <a href="{{ url_for('billing.pricing') }}" class="block hover:text-white">Pricing</a>
+      <a href="{{ url_for('feedback.feedback_page') }}" class="block hover:text-white">Feedback</a>
+      <a href="{{ url_for('settings.settings_page') }}" class="block hover:text-white">Settings</a>
+      {% if current_user_is_admin %}<a href="{{ url_for('admin.admin_dashboard') }}" class="block text-amber-400">Admin</a>{% endif %}
+      <a href="{{ url_for('auth.logout') }}" class="block text-coral-500">Log out</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="block hover:text-white">Log in</a>
+      <a href="{{ url_for('auth.signup') }}" class="block text-teal-400">Sign up</a>
+    {% endif %}
+  </div>
+</header>
+
+<main class="pt-16 min-h-screen">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="max-w-3xl mx-auto px-5 sm:px-8 mt-6 space-y-3">
+      {% for category, message in messages %}
+      <div class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
+        {% if category == 'error' %}bg-coral-100 text-coral-600 border border-coral-500/30
+        {% else %}bg-teal-100 text-teal-700 border border-teal-500/30{% endif %}">
+        <i class="fa-solid {% if category == 'error' %}fa-triangle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+{% if session.get('user_id') %}
+<div id="chat-widget" class="fixed bottom-5 right-5 z-50">
+  <button id="chat-toggle" class="w-14 h-14 rounded-full bg-teal-500 hover:bg-teal-400 text-ink shadow-lg flex items-center justify-center transition-colors">
+    <i class="fa-solid fa-comment-dots text-xl"></i>
+  </button>
+  <div id="chat-panel" class="hidden absolute bottom-16 right-0 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+    <div class="bg-ink px-4 py-3 flex items-center justify-between">
+      <span class="text-white text-sm font-display font-semibold"><i class="fa-solid fa-wave-square text-teal-400 mr-2"></i>Wellness Assistant</span>
+    </div>
+    <div id="chat-messages" class="h-64 overflow-y-auto px-4 py-3 space-y-2 text-sm"></div>
+    <form id="chat-form" class="flex items-center gap-2 border-t border-slate-200 p-2">
+      <input id="chat-input" type="text" maxlength="2000" placeholder="Ask about your results, stress, sleep…"
+        class="flex-1 text-sm px-3 py-2 rounded-lg border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100">
+      <button type="submit" class="w-9 h-9 rounded-lg bg-ink text-white flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<footer class="bg-ink border-t border-white/10 py-8 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="flex items-center gap-2 text-slate-400 text-sm">
+      <i class="fa-solid fa-wave-square text-teal-400"></i> Kivora — v2.0
+    </div>
+    <div class="flex items-center gap-5 text-xs text-slate-500">
+      <a href="{{ url_for('main.privacy') }}" class="hover:text-teal-400 transition-colors">Privacy Policy</a>
+      {% if session.get('user_id') %}<a href="{{ url_for('main.insights') }}" class="hover:text-teal-400 transition-colors">Model Insights</a>{% endif %}
+      <span>Not a substitute for professional mental health advice</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (menuToggle) menuToggle.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+  const chatToggle = document.getElementById('chat-toggle');
+  const chatPanel = document.getElementById('chat-panel');
+  if (chatToggle) chatToggle.addEventListener('click', () => chatPanel.classList.toggle('hidden'));
+
+  const darkToggle = document.getElementById('dark-toggle');
+  if (darkToggle) {
+    if (localStorage.getItem('mm-dark') === '1') document.documentElement.classList.add('dark');
+    darkToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('mm-dark', document.documentElement.classList.contains('dark') ? '1' : '0');
+    });
+  }
+
+  const moreToggle = document.getElementById('more-toggle');
+  const morePanel = document.getElementById('more-panel');
+  if (moreToggle) {
+    moreToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      morePanel.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+      if (!morePanel.classList.contains('hidden') && !morePanel.contains(e.target) && e.target !== moreToggle) {
+        morePanel.classList.add('hidden');
+      }
+    });
+  }
+
+  const notifToggle = document.getElementById('notif-toggle');
+  const notifPanel = document.getElementById('notif-panel');
+  const notifList = document.getElementById('notif-list');
+  const notifBadge = document.getElementById('notif-badge');
+  const notifClear = document.getElementById('notif-clear');
+
+  async function loadNotifications() {
+    try {
+      const res = await fetch('/api/notifications');
+      const data = await res.json();
+      if (!data.ok) return;
+      const items = data.notifications;
+      notifBadge.classList.toggle('hidden', items.length === 0);
+      notifList.innerHTML = items.length
+        ? items.map(n => `<div class="px-4 py-3 text-sm text-slate-600 border-b border-slate-50">${n.message}</div>`).join('')
+        : '<div class="px-4 py-6 text-sm text-slate-400 text-center">No new notifications.</div>';
+    } catch {}
+  }
+
+  if (notifToggle) {
+    notifToggle.addEventListener('click', () => notifPanel.classList.toggle('hidden'));
+    notifClear.addEventListener('click', async () => {
+      await fetch('/api/notifications/read-all', { method: 'POST' });
+      loadNotifications();
+    });
+    loadNotifications();
+  }
+
+  const chatForm = document.getElementById('chat-form');
+  if (chatForm) {
+    const messagesEl = document.getElementById('chat-messages');
+    const input = document.getElementById('chat-input');
+    const addMsg = (text, who) => {
+      const div = document.createElement('div');
+      div.className = who === 'user'
+        ? 'bg-teal-500 text-white rounded-lg px-3 py-2 ml-8 text-right'
+        : 'bg-slate-100 text-slate-700 rounded-lg px-3 py-2 mr-8';
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    };
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = input.value.trim();
+      if (!msg) return;
+      addMsg(msg, 'user');
+      input.value = '';
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg }),
+        });
+        const data = await res.json();
+        addMsg(data.ok ? data.reply : (data.error || 'Something went wrong.'), 'bot');
+      } catch {
+        addMsg('Could not reach the assistant.', 'bot');
+      }
+    });
+  }
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
