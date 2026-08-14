@@ -62,3 +62,5 @@ transformers>=4.40,<5
 #   python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 # (torch>=2.2 is required for Python 3.12 wheels; the command above
 # resolves to a current compatible CPU build automatically.)
+
+gunicorn
